@@ -1,0 +1,9 @@
+# Local API credentials
+config.js
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
