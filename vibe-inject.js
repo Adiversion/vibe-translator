@@ -613,6 +613,16 @@ function injectActionBarButton(container) {
             textToTranslate = "TITLE: " + originalTitleText + "\n\nBODY: " + freshBodyText;
         }
 
+        // Guard against invalidated extension context (e.g. extension was reloaded in chrome://extensions but page was not refreshed)
+        if (typeof chrome === "undefined" || !chrome.runtime || !chrome.runtime.sendMessage) {
+            textSpan.innerText = 'Refresh Tab';
+            btn.style.color = '#ff4500';
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('vibe-processing');
+            console.warn("Vibe Translator extension context was invalidated or updated. Please refresh this Reddit tab (F5).");
+            return;
+        }
+
         // Animate processing state
         textSpan.innerText = 'Translating...';
         btn.style.pointerEvents = 'none';
@@ -621,51 +631,68 @@ function injectActionBarButton(container) {
         if (titleEl) titleEl.classList.add('vibe-text-processing');
         if (textBody) textBody.classList.add('vibe-text-processing');
 
-        chrome.runtime.sendMessage({ action: "fetch_gemini", text: textToTranslate }, (response) => {
-            if (titleEl) titleEl.classList.remove('vibe-text-processing');
-            if (textBody) textBody.classList.remove('vibe-text-processing');
+        try {
+            chrome.runtime.sendMessage({ action: "fetch_gemini", text: textToTranslate }, (response) => {
+                if (titleEl) titleEl.classList.remove('vibe-text-processing');
+                if (textBody) textBody.classList.remove('vibe-text-processing');
 
-            btn.style.pointerEvents = 'auto';
-            btn.classList.remove('vibe-processing');
+                btn.style.pointerEvents = 'auto';
+                btn.classList.remove('vibe-processing');
 
-            if (response && response.translated) {
-                const parsed = parseTranslationResponse(response.translated, hasTitle, hasBodyNow);
-
-                if (hasTitle && parsed.title) {
-                    translatedTitle = parsed.title;
-                    if (titleEl) titleEl.innerText = translatedTitle;
-                    if (container.hasAttribute('post-title')) {
-                        container.setAttribute('post-title', translatedTitle);
-                    }
+                if (chrome.runtime?.lastError) {
+                    textSpan.innerText = 'Failed';
+                    btn.style.color = '#d93a00';
+                    console.error("Vibe translation error:", chrome.runtime.lastError.message);
+                    return;
                 }
 
-                if (hasBodyNow && parsed.body) {
-                    translatedBody = parsed.body;
-                    if (!translatedDiv) {
-                        translatedDiv = document.createElement('div');
-                        translatedDiv.className = 'vibe-translated-text-body';
-                        const slotName = textBody.getAttribute('slot');
-                        if (slotName) translatedDiv.setAttribute('slot', slotName);
-                        if (textBody.parentNode) {
-                            textBody.parentNode.insertBefore(translatedDiv, textBody.nextSibling);
+                if (response && response.translated) {
+                    const parsed = parseTranslationResponse(response.translated, hasTitle, hasBodyNow);
+
+                    if (hasTitle && parsed.title) {
+                        translatedTitle = parsed.title;
+                        if (titleEl) titleEl.innerText = translatedTitle;
+                        if (container.hasAttribute('post-title')) {
+                            container.setAttribute('post-title', translatedTitle);
                         }
                     }
-                    translatedDiv.innerText = translatedBody;
-                    translatedDiv.style.display = 'block';
-                    textBody.style.display = 'none';
-                }
 
-                textSpan.innerText = 'Show Original';
-                btn.style.color = '#24a0ed';
-                btn.style.backgroundColor = 'rgba(36, 160, 237, 0.12)';
-                btn.classList.add('vibe-active');
-                isShowingTranslated = true;
-            } else {
-                textSpan.innerText = 'Failed';
-                btn.style.color = '#d93a00';
-                console.error("Vibe translation failed:", response?.error || "Unknown error");
-            }
-        });
+                    if (hasBodyNow && parsed.body) {
+                        translatedBody = parsed.body;
+                        if (!translatedDiv) {
+                            translatedDiv = document.createElement('div');
+                            translatedDiv.className = 'vibe-translated-text-body';
+                            const slotName = textBody.getAttribute('slot');
+                            if (slotName) translatedDiv.setAttribute('slot', slotName);
+                            if (textBody.parentNode) {
+                                textBody.parentNode.insertBefore(translatedDiv, textBody.nextSibling);
+                            }
+                        }
+                        translatedDiv.innerText = translatedBody;
+                        translatedDiv.style.display = 'block';
+                        textBody.style.display = 'none';
+                    }
+
+                    textSpan.innerText = 'Show Original';
+                    btn.style.color = '#24a0ed';
+                    btn.style.backgroundColor = 'rgba(36, 160, 237, 0.12)';
+                    btn.classList.add('vibe-active');
+                    isShowingTranslated = true;
+                } else {
+                    textSpan.innerText = 'Failed';
+                    btn.style.color = '#d93a00';
+                    console.error("Vibe translation failed:", response?.error || "Unknown error");
+                }
+            });
+        } catch (err) {
+            if (titleEl) titleEl.classList.remove('vibe-text-processing');
+            if (textBody) textBody.classList.remove('vibe-text-processing');
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('vibe-processing');
+            textSpan.innerText = 'Refresh Tab';
+            btn.style.color = '#ff4500';
+            console.error("Extension runtime error (please refresh page):", err);
+        }
     }, { capture: true });
 
     // Mount the button
