@@ -453,7 +453,7 @@ function injectActionBarButton(container) {
     const btn = document.createElement('button');
     btn.className = 'vibe-translate-action-btn';
     btn.setAttribute('type', 'button');
-    btn.setAttribute('aria-label', 'Translate Vibe to Hinglish');
+    btn.setAttribute('aria-label', 'Translate Vibe into regional slang');
 
     btn.innerHTML = `
         <svg class="vibe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 6px; flex-shrink: 0;">

@@ -6,11 +6,12 @@
 
 ## 1. Project Overview
 
-**Vibe Translator** is a Manifest V3 Chrome Extension that integrates into Reddit's desktop interface (modern **Shreddit** Lit-based web components). It injects a native-styled **"Translate Vibe"** action pill button into Reddit posts and comments, allowing users to translate regional and English Reddit content into natural, authentic, conversational **Hinglish** (Hindi + English slang) using Google Gemini.
+**Vibe Translator** is a Manifest V3 Chrome Extension that integrates into Reddit's desktop interface (modern **Shreddit** Lit-based web components). It injects a native-styled **"Translate Vibe"** action pill button into Reddit posts and comments, allowing users to translate regional and English Reddit content into natural, authentic, conversational Indian regional dialects and slang (Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Punjabi, Marathi, Gujarati, Odia, English) written in conversational Latin / English script using Google Gemini.
 
 - **Target Site:** `*://*.reddit.com/*`
-- **Model Endpoint:** Google Gemini 3.5 Flash Lite (`gemini-3.5-flash-lite:generateContent`) via v1beta REST API.
-- **Key Characteristics:** Authentic slang mapping (e.g. Telugu colloquialisms into North Indian/Mumbai slang), zero robotic gender slashes (`gaya/gayi`), minimal emojis, sentence-by-sentence pacing preservation, in-place toggle ("Show Original" / "Translate Vibe").
+- **Supported Dialects:** Hindi (Hinglish), Tamil, Telugu, Malayalam, Kannada, Bengali, Punjabi, Marathi, Gujarati, Odia, and Casual Internet English (all written in English letters).
+- **Model Endpoints:** Primary `gemini-3.5-flash-lite:generateContent` with seamless automatic fallback to `gemini-3.8-flash:generateContent` via v1beta REST API.
+- **Key Characteristics:** Authentic internet slang mapping, preservation of code-mixing/English phrasing, zero robotic gender slashes, identical emoji/punctuation preservation, in-place toggle ("Show Original" / "Translate Vibe").
 
 ---
 
