@@ -517,6 +517,13 @@ function injectActionBarButton(container) {
         e.preventDefault();
 
         const textSpan = btn.querySelector('.vibe-btn-text');
+
+        // If context was previously invalidated, clicking the button reloads the page directly
+        if (textSpan && textSpan.innerText === 'Refresh Tab') {
+            window.location.reload();
+            return;
+        }
+
         if (!titleEl && hasTitle) {
             titleEl = locateTitleElement(container);
         }
@@ -614,11 +621,12 @@ function injectActionBarButton(container) {
         }
 
         // Guard against invalidated extension context (e.g. extension was reloaded in chrome://extensions but page was not refreshed)
-        if (typeof chrome === "undefined" || !chrome.runtime || !chrome.runtime.sendMessage) {
+        if (typeof chrome === "undefined" || !chrome.runtime || !chrome.runtime.id || !chrome.runtime.sendMessage) {
             textSpan.innerText = 'Refresh Tab';
             btn.style.color = '#ff4500';
             btn.style.pointerEvents = 'auto';
             btn.classList.remove('vibe-processing');
+            btn.title = "Extension was updated. Click to refresh page.";
             console.warn("Vibe Translator extension context was invalidated or updated. Please refresh this Reddit tab (F5).");
             return;
         }
@@ -691,7 +699,8 @@ function injectActionBarButton(container) {
             btn.classList.remove('vibe-processing');
             textSpan.innerText = 'Refresh Tab';
             btn.style.color = '#ff4500';
-            console.error("Extension runtime error (please refresh page):", err);
+            btn.title = "Extension was updated. Click to refresh page.";
+            console.warn("Extension runtime error (click button or press F5 to refresh page):", err);
         }
     }, { capture: true });
 
