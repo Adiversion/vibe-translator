@@ -53,8 +53,10 @@ BODY: <translated body>
 - If the input does NOT have "TITLE:" and "BODY:" labels (e.g. title-only post or single comment), output ONLY the translated text directly. NEVER add "TITLE:" or "BODY:" labels when they were not in the input.
 - Do NOT use markdown bold/headers for labels (no **TITLE:**, no ## TITLE). Use plain text only.
 
-7. NEVER INVENT:
-- Do not add fake plot points, extra facts, or change the underlying meaning. Capture the vibe, but keep the facts and thoughts 100% faithful to the original post.
+7. NEVER INVENT OR ADD WORDS NOT MENTIONED BY THE AUTHOR:
+- Do NOT add new words, extra thoughts, commentary, jokes, or embellishments that the author never mentioned.
+- Sentence count, thought flow, and meaning must match the original 1:1.
+- Matching the author's persona means expressing THEIR EXACT THOUGHTS in that person's authentic Hinglish voice — never putting words in their mouth or exaggerating beyond what they said.
 
 ---
 
@@ -132,7 +134,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     }
                 ],
                 generationConfig: {
-                    temperature: 0.6
+                    temperature: 0.5
                 },
                 safetySettings: [
                     { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
