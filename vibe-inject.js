@@ -115,7 +115,61 @@ function getContainerContexts(container) {
 function findBestActionBarTarget(container) {
     const contexts = getContainerContexts(container);
 
-    // Priority 1: Native Share button
+    // Never insert the button inside an anchor — it would make clicks navigate
+    const isSafeParent = (el) => {
+        if (!el) return false;
+        let node = el;
+        while (node && node !== container) {
+            if (node.tagName && node.tagName.toLowerCase() === 'a') return false;
+            node = node.parentNode;
+        }
+        return true;
+    };
+
+    // Shallow contexts only: container light DOM + its direct shadow root.
+    // Used for text-based fallback walks so we never dive into internal
+    // shadow roots of nested components (e.g. shreddit-comment-vote-button).
+    const shallowContexts = [container];
+    if (container.shadowRoot) shallowContexts.push(container.shadowRoot);
+
+    // ── Priority 1: Action row container ─────────────────────────────────────
+    // Checked first — most semantically correct location for both posts and comments.
+    const rowSelectors = [
+        // Named Shreddit web components
+        'shreddit-post-action-row',
+        'shreddit-comment-action-row',
+        'shreddit-async-action-row',
+        // Slotted / data-testid variants
+        '[slot="action-row"]',
+        '[data-testid="action-row"]',
+        '[data-testid="post-action-row"]',
+        '[data-testid="seeker-action-row"]',
+        // Actual Reddit comment action bar (found via DevTools: shadow DOM)
+        // Exact class match and flexible multi-class match
+        'div[class="flex items-center max-h-2xl"]',
+        'div.flex.items-center.max-h-2xl',
+        // Broader Tailwind flex-row patterns Reddit uses for action bars
+        'div.flex.items-center.gap-xs',
+        'div.flex.items-center.gap-sm',
+        'ul.flex.items-center',
+        'ol.flex.items-center'
+    ];
+
+    for (const ctx of contexts) {
+        for (const sel of rowSelectors) {
+            const row = ctx.querySelector(sel);
+            if (row) {
+                // Prefer inserting into the row's own shadow root (renders inline);
+                // otherwise append to the element itself.
+                const target = row.shadowRoot || row;
+                if (isSafeParent(target)) {
+                    return { parent: target, nextSibling: null };
+                }
+            }
+        }
+    }
+
+    // ── Priority 2: Native Share button (specific selectors) ─────────────────
     const shareSelectors = [
         'shreddit-post-share-button',
         'shreddit-comment-share-button',
@@ -130,25 +184,27 @@ function findBestActionBarTarget(container) {
     for (const ctx of contexts) {
         for (const sel of shareSelectors) {
             const el = ctx.querySelector(sel);
-            if (el && el.parentNode) {
+            if (el && el.parentNode && isSafeParent(el.parentNode)) {
                 return { parent: el.parentNode, nextSibling: el.nextSibling };
             }
         }
+    }
 
-        // Text match for Share button (e.g., <button><span>Share</span></button>)
-        const buttons = ctx.querySelectorAll('button, [role="button"], a');
-        for (const b of buttons) {
+    // Text-walk for Share — shallow only to avoid matching internal component buttons
+    for (const ctx of shallowContexts) {
+        const btns = ctx.querySelectorAll('button, [role="button"]');
+        for (const b of btns) {
             const label = (b.getAttribute('aria-label') || '').toLowerCase();
             const text = (b.innerText || b.textContent || '').trim().toLowerCase();
             if (label === 'share' || text === 'share') {
-                if (b.parentNode) {
+                if (b.parentNode && isSafeParent(b.parentNode)) {
                     return { parent: b.parentNode, nextSibling: b.nextSibling };
                 }
             }
         }
     }
 
-    // Priority 2: Comment or Reply button
+    // ── Priority 3: Reply / Comment button (specific selectors) ──────────────
     const commentReplySelectors = [
         'shreddit-post-comment-button',
         'shreddit-comment-reply-button',
@@ -156,7 +212,6 @@ function findBestActionBarTarget(container) {
         '[data-post-click-location="reply"]',
         '[data-testid="comments-button"]',
         '[data-testid="reply-button"]',
-        'a[href*="/comments/"]',
         'button[aria-label*="reply" i]',
         'button[aria-label*="comment" i]'
     ];
@@ -164,41 +219,29 @@ function findBestActionBarTarget(container) {
     for (const ctx of contexts) {
         for (const sel of commentReplySelectors) {
             const el = ctx.querySelector(sel);
-            if (el && el.parentNode) {
+            if (el && el.parentNode && isSafeParent(el.parentNode)) {
                 return { parent: el.parentNode, nextSibling: el.nextSibling };
             }
         }
+    }
 
-        const buttons = ctx.querySelectorAll('button, [role="button"], a');
-        for (const b of buttons) {
+    // Text-walk for Reply — shallow only
+    for (const ctx of shallowContexts) {
+        const btns = ctx.querySelectorAll('button, [role="button"]');
+        for (const b of btns) {
             const label = (b.getAttribute('aria-label') || '').toLowerCase();
             const text = (b.innerText || b.textContent || '').trim().toLowerCase();
-            if (label.includes('reply') || text === 'reply' || text.includes('comments')) {
-                if (b.parentNode) {
+            if (label.includes('reply') || text === 'reply') {
+                if (b.parentNode && isSafeParent(b.parentNode)) {
                     return { parent: b.parentNode, nextSibling: b.nextSibling };
                 }
             }
         }
     }
 
-    // Priority 3: Award button
-    for (const ctx of contexts) {
-        const awardBtn = ctx.querySelector('button[aria-label*="award" i], [data-testid="award-button"]');
-        if (awardBtn && awardBtn.parentNode) {
-            return { parent: awardBtn.parentNode, nextSibling: awardBtn.nextSibling };
-        }
-        const buttons = ctx.querySelectorAll('button, [role="button"], a');
-        for (const b of buttons) {
-            const text = (b.innerText || b.textContent || '').trim().toLowerCase();
-            if (text === 'award') {
-                if (b.parentNode) {
-                    return { parent: b.parentNode, nextSibling: b.nextSibling };
-                }
-            }
-        }
-    }
-
-    // Priority 4: Vote button group (places sibling AFTER the group, never inside)
+    // ── Priority 4: Vote button group (uses custom element, not internal buttons) ─
+    // We target the shreddit-*-vote-button ELEMENT ITSELF as the group reference,
+    // never its internal shadow root — that would place our button inside the component.
     const voteGroupSelectors = [
         '.rpl-vote-button-group',
         '[data-post-click-location="vote"]',
@@ -210,42 +253,147 @@ function findBestActionBarTarget(container) {
     for (const ctx of contexts) {
         for (const sel of voteGroupSelectors) {
             const el = ctx.querySelector(sel);
-            if (el && el.parentNode) {
+            if (el && el.parentNode && isSafeParent(el.parentNode)) {
                 return { parent: el.parentNode, nextSibling: el.nextSibling };
             }
         }
-
-        const upvoteBtn = ctx.querySelector('button[aria-label*="upvote" i], button[aria-label*="up" i]');
-        if (upvoteBtn) {
-            const group = upvoteBtn.closest('div[role="group"]') || upvoteBtn.parentNode;
-            if (group && group.parentNode) {
-                return { parent: group.parentNode, nextSibling: group.nextSibling };
-            }
-        }
     }
 
-    // Priority 5: Action row or toolbar container
-    const rowSelectors = [
-        'shreddit-post-action-row',
-        'shreddit-comment-action-row',
-        'shreddit-async-action-row',
-        '[slot="action-row"]',
-        '[data-testid="action-row"]',
-        '[data-testid="post-action-row"]',
-        '[data-testid="seeker-action-row"]'
-    ];
-
-    for (const ctx of contexts) {
-        for (const sel of rowSelectors) {
-            const row = ctx.querySelector(sel);
-            if (row) {
-                const target = row.shadowRoot || row;
-                return { parent: target, nextSibling: null };
-            }
-        }
-    }
-
+    // Return null — action bar not yet rendered. MutationObserver will retry
+    // once the component's shadow DOM is fully hydrated.
     return null;
+}
+
+
+function locateTitleElement(container) {
+    if (!container || container.tagName.toLowerCase() === 'shreddit-comment') {
+        return null;
+    }
+    const TITLE_SELECTORS = '[slot="title"], [slot="post-title"], h1[id*="post-title"], [data-testid="post-title"], a[id*="post-title"], h1';
+    let el = container.querySelector(TITLE_SELECTORS);
+    if (!el && container.shadowRoot) {
+        el = container.shadowRoot.querySelector(TITLE_SELECTORS);
+    }
+    return el;
+}
+
+function locateBodyElement(container) {
+    if (!container) return null;
+    const isComment = container.tagName.toLowerCase() === 'shreddit-comment';
+
+    if (isComment) {
+        // Strictly comment content containers (never usernames, flairs, or hovercards)
+        const commentSelectors = [
+            '[slot="comment"]',
+            'div[id$="-comment-rtjson-content"]',
+            '[id*="-comment-rtjson-content"]',
+            '[data-testid="comment"]'
+        ];
+        for (const sel of commentSelectors) {
+            const el = container.querySelector(sel);
+            if (el) return el;
+        }
+        if (container.shadowRoot) {
+            for (const sel of commentSelectors) {
+                const el = container.shadowRoot.querySelector(sel);
+                if (el) return el;
+            }
+        }
+        return container.querySelector('[slot="comment"] p') || container.querySelector('p');
+    }
+
+    // Post body: strictly target post text containers, NEVER author flairs or hovercards
+    const postSelectors = [
+        '[slot="text-body"]',
+        'div[id$="-post-rtjson-content"]',
+        '[id*="-post-rtjson-content"]',
+        '[data-testid="post-body"]',
+        '[slot="blurred"]',
+        'shreddit-blurred-container[slot="text-body"]',
+        'shreddit-blurred-container'
+    ];
+    for (const sel of postSelectors) {
+        const el = container.querySelector(sel);
+        if (el) return el;
+    }
+    if (container.shadowRoot) {
+        for (const sel of postSelectors) {
+            const el = container.shadowRoot.querySelector(sel);
+            if (el) return el;
+        }
+    }
+    return null;
+}
+
+function extractCleanBodyText(bodyEl) {
+    if (!bodyEl) return '';
+    let text = (bodyEl.innerText || bodyEl.textContent || '');
+    // Strip "View spoiler" and "Read more" UI artifacts
+    return text.replace(/^\s*View spoiler\s*/i, '')
+               .replace(/\s*View spoiler\s*$/i, '')
+               .replace(/Read more\s*$/i, '')
+               .trim();
+}
+
+function parseTranslationResponse(rawText, hasTitle, hasBody) {
+    let clean = (rawText || '').trim();
+    // Strip markdown code block wrapping if present
+    clean = clean.replace(/^```(?:markdown|text)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // Regex to match TITLE: and BODY: tags with optional markdown bolding (**, ##, etc.)
+    const titleRegex = /(?:^|\n)\s*(?:\*{1,2}|#{1,3}\s*)?TITLE\s*:?\s*(?:\*{1,2})?\s*([\s\S]*?)(?=(?:\r?\n\s*(?:\*{1,2}|#{1,3}\s*)?BODY\s*:?\s*(?:\*{1,2})?)|$)/i;
+    const bodyRegex = /(?:^|\n)\s*(?:\*{1,2}|#{1,3}\s*)?BODY\s*:?\s*(?:\*{1,2})?\s*([\s\S]*)$/i;
+
+    const titleMatch = clean.match(titleRegex);
+    const bodyMatch = clean.match(bodyRegex);
+
+    if (hasTitle && hasBody) {
+        if (titleMatch && bodyMatch) {
+            return {
+                title: titleMatch[1].trim(),
+                body: bodyMatch[1].trim()
+            };
+        }
+        if (titleMatch && !bodyMatch) {
+            return {
+                title: titleMatch[1].trim(),
+                body: clean.replace(titleRegex, '').trim()
+            };
+        }
+        // Fallback: split on double newline (paragraph break) if labels omitted
+        const parts = clean.split(/\n\s*\n/);
+        if (parts.length > 1) {
+            return {
+                title: parts[0].trim(),
+                body: parts.slice(1).join('\n\n').trim()
+            };
+        }
+        return {
+            title: clean,
+            body: ''
+        };
+    } else if (hasTitle && !hasBody) {
+        // Single title-only post: if model generated TITLE: ... and BODY: ..., merge cleanly without labels
+        if (titleMatch) {
+            const titlePart = titleMatch[1].trim();
+            const bodyPart = bodyMatch ? bodyMatch[1].trim() : '';
+            const combined = bodyPart ? `${titlePart} ${bodyPart}` : titlePart;
+            return {
+                title: combined.replace(/^(?:\*{1,2})?TITLE\s*:?\s*(?:\*{1,2})?\s*/i, '').trim(),
+                body: ''
+            };
+        }
+        return {
+            title: clean.replace(/^(?:\*{1,2})?TITLE\s*:?\s*(?:\*{1,2})?\s*/i, '').trim(),
+            body: ''
+        };
+    } else {
+        // Body-only (comment or post without title)
+        return {
+            title: '',
+            body: clean.replace(/^(?:\*{1,2})?BODY\s*:?\s*(?:\*{1,2})?\s*/i, '').trim()
+        };
+    }
 }
 
 function injectActionBarButton(container) {
@@ -272,34 +420,17 @@ function injectActionBarButton(container) {
         return;
     }
 
-    const contexts = getContainerContexts(container);
-    const findInContexts = (selector) => {
-        for (const ctx of contexts) {
-            const el = ctx.querySelector(selector);
-            if (el) return el;
-        }
-        return null;
-    };
-
-    // Locate Title and Body
     const titleAttr = container.getAttribute('post-title') || '';
-    const titleEl = findInContexts('[slot="title"], [slot="post-title"], h1[id*="post-title"], h1, h2, h3, [data-testid="post-title"], a[id*="post-title"]');
+    let titleEl = locateTitleElement(container);
+    let textBody = locateBodyElement(container);
 
-    // Locate text body: supports post bodies and comment text
-    let textBody = findInContexts(
-        '[slot="comment"], [slot="text-body"], [id*="-comment-rtjson-content"], [id*="-post-rtjson-content"], [data-testid="comment"], [data-testid="post-body"], .md, [data-post-click-location="text-body"], [slot="body"]'
-    );
+    const originalTitleText = titleAttr.trim() || (titleEl && titleEl.innerText.trim()) || '';
+    const initialBodyText = extractCleanBodyText(textBody);
 
-    // Additional fallback for comments with paragraph content
-    if (!textBody && container.tagName.toLowerCase() === 'shreddit-comment') {
-        textBody = container.querySelector('[slot="comment"] p') || container.querySelector('p');
-    }
-
-    const originalTitleText = (titleEl && titleEl.innerText.trim()) || titleAttr.trim();
     const hasTitle = Boolean(originalTitleText);
-    const hasBody = Boolean(textBody && textBody.innerText.trim());
+    const hasInitialBody = Boolean(initialBodyText);
 
-    if (!hasTitle && !hasBody) return;
+    if (!hasTitle && !hasInitialBody && !textBody) return;
 
     // Find action bar placement
     const targetPlacement = findBestActionBarTarget(container);
@@ -357,6 +488,8 @@ function injectActionBarButton(container) {
         vertical-align: middle;
         white-space: nowrap;
         user-select: none;
+        position: relative;
+        z-index: 2;
     `;
 
     let translatedTitle = '';
@@ -376,18 +509,17 @@ function injectActionBarButton(container) {
         }
     });
 
-    const getBodyParagraphs = () => {
-        if (!textBody) return [];
-        const nodes = Array.from(textBody.querySelectorAll('p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote'));
-        return nodes.length > 0 ? nodes : [textBody];
-    };
-
+    // Use capture:true so our handler fires BEFORE Reddit's card-level capture listener.
+    // stopImmediatePropagation() prevents Reddit's navigation handler from running at all.
     btn.addEventListener('click', (e) => {
+        e.stopImmediatePropagation();
         e.stopPropagation();
         e.preventDefault();
 
         const textSpan = btn.querySelector('.vibe-btn-text');
-        const bodyParagraphs = getBodyParagraphs();
+        if (!titleEl && hasTitle) {
+            titleEl = locateTitleElement(container);
+        }
 
         // Toggle state once translated
         if (translatedTitle || translatedBody) {
@@ -399,7 +531,7 @@ function injectActionBarButton(container) {
                 if (container.hasAttribute('post-title')) {
                     container.setAttribute('post-title', originalTitleText);
                 }
-                bodyParagraphs.forEach(el => el.style.display = '');
+                if (textBody) textBody.style.display = '';
                 if (translatedDiv) translatedDiv.style.display = 'none';
 
                 textSpan.innerText = 'Translate Vibe';
@@ -407,35 +539,78 @@ function injectActionBarButton(container) {
                 btn.style.backgroundColor = 'var(--color-neutral-background-weak, rgba(0, 0, 0, 0.05))';
                 btn.classList.remove('vibe-active');
                 isShowingTranslated = false;
+                return;
             } else {
-                // Show translated
-                if (hasTitle && titleEl && translatedTitle) {
-                    titleEl.innerText = translatedTitle;
+                // Before showing cached title-only translation, check if body content has newly appeared
+                // (e.g. user unfolded a spoiler after a prior title-only translation).
+                if (translatedTitle && !translatedBody) {
+                    const freshBody = locateBodyElement(container);
+                    const freshBodyText = extractCleanBodyText(freshBody);
+                    if (freshBodyText) {
+                        // Body is now available — reset cache so we fall through to full translate
+                        textBody = freshBody;
+                        translatedTitle = '';
+                        translatedBody = '';
+                        if (titleEl) titleEl.innerText = originalTitleText;
+                        if (container.hasAttribute('post-title')) {
+                            container.setAttribute('post-title', originalTitleText);
+                        }
+                        // Fall through to fresh translation below
+                    } else {
+                        // Show cached title-only translation
+                        if (hasTitle && titleEl && translatedTitle) {
+                            titleEl.innerText = translatedTitle;
+                        }
+                        if (container.hasAttribute('post-title') && translatedTitle) {
+                            container.setAttribute('post-title', translatedTitle);
+                        }
+                        textSpan.innerText = 'Show Original';
+                        btn.style.color = '#24a0ed';
+                        btn.style.backgroundColor = 'rgba(36, 160, 237, 0.12)';
+                        btn.classList.add('vibe-active');
+                        isShowingTranslated = true;
+                        return;
+                    }
+                } else {
+                    // Show cached translation
+                    if (hasTitle && titleEl && translatedTitle) {
+                        titleEl.innerText = translatedTitle;
+                    }
+                    if (container.hasAttribute('post-title') && translatedTitle) {
+                        container.setAttribute('post-title', translatedTitle);
+                    }
+                    if (translatedBody) {
+                        if (textBody) textBody.style.display = 'none';
+                        if (translatedDiv) translatedDiv.style.display = 'block';
+                    }
+                    textSpan.innerText = 'Show Original';
+                    btn.style.color = '#24a0ed';
+                    btn.style.backgroundColor = 'rgba(36, 160, 237, 0.12)';
+                    btn.classList.add('vibe-active');
+                    isShowingTranslated = true;
+                    return;
                 }
-                if (container.hasAttribute('post-title') && translatedTitle) {
-                    container.setAttribute('post-title', translatedTitle);
-                }
-                if (translatedBody) {
-                    bodyParagraphs.forEach(el => el.style.display = 'none');
-                    if (translatedDiv) translatedDiv.style.display = 'block';
-                }
-                textSpan.innerText = 'Show Original';
-                btn.style.color = '#24a0ed';
-                btn.style.backgroundColor = 'rgba(36, 160, 237, 0.12)';
-                btn.classList.add('vibe-active');
-                isShowingTranslated = true;
             }
-            return;
         }
+
+        // Re-evaluate body at click time (feed cards load body content lazily or spoiler unfolded)
+        const freshBody = locateBodyElement(container);
+        if (freshBody) {
+            textBody = freshBody;
+        }
+        const freshBodyText = extractCleanBodyText(textBody);
+        const hasBodyNow = Boolean(freshBodyText);
+
+        if (!hasTitle && !hasBodyNow) return;
 
         // Prepare text to translate
         let textToTranslate = '';
-        if (hasTitle && !hasBody) {
+        if (hasTitle && !hasBodyNow) {
             textToTranslate = originalTitleText;
-        } else if (!hasTitle && hasBody) {
-            textToTranslate = textBody.innerText.replace(/Read more\s*$/i, '').trim();
+        } else if (!hasTitle && hasBodyNow) {
+            textToTranslate = freshBodyText;
         } else {
-            textToTranslate = "TITLE: " + originalTitleText + "\n\nBODY: " + textBody.innerText.replace(/Read more\s*$/i, '').trim();
+            textToTranslate = "TITLE: " + originalTitleText + "\n\nBODY: " + freshBodyText;
         }
 
         // Animate processing state
@@ -444,65 +619,40 @@ function injectActionBarButton(container) {
         btn.classList.add('vibe-processing');
 
         if (titleEl) titleEl.classList.add('vibe-text-processing');
-        bodyParagraphs.forEach(el => el.classList.add('vibe-text-processing'));
+        if (textBody) textBody.classList.add('vibe-text-processing');
 
         chrome.runtime.sendMessage({ action: "fetch_gemini", text: textToTranslate }, (response) => {
             if (titleEl) titleEl.classList.remove('vibe-text-processing');
-            bodyParagraphs.forEach(el => el.classList.remove('vibe-text-processing'));
+            if (textBody) textBody.classList.remove('vibe-text-processing');
 
             btn.style.pointerEvents = 'auto';
             btn.classList.remove('vibe-processing');
 
             if (response && response.translated) {
-                const fullTranslated = response.translated.trim();
+                const parsed = parseTranslationResponse(response.translated, hasTitle, hasBodyNow);
 
-                if (hasTitle && !hasBody) {
-                    // Post with title only (image / media posts)
-                    translatedTitle = fullTranslated;
+                if (hasTitle && parsed.title) {
+                    translatedTitle = parsed.title;
                     if (titleEl) titleEl.innerText = translatedTitle;
                     if (container.hasAttribute('post-title')) {
                         container.setAttribute('post-title', translatedTitle);
                     }
-                } else if (!hasTitle && hasBody) {
-                    // Comment or post with body only
-                    translatedBody = fullTranslated;
-                    translatedDiv = document.createElement('div');
-                    translatedDiv.className = 'vibe-translated-text-body';
-                    translatedDiv.innerText = translatedBody;
+                }
 
-                    // Insert inside or after textBody
-                    if (textBody.appendChild && textBody !== container) {
-                        textBody.appendChild(translatedDiv);
-                    } else if (textBody.parentNode) {
-                        textBody.parentNode.insertBefore(translatedDiv, textBody.nextSibling);
-                    }
-                    bodyParagraphs.forEach(el => el.style.display = 'none');
-                } else {
-                    // Both title and body present
-                    const titleMatch = fullTranslated.match(/^TITLE:\s*(.*?)(?=\n\s*BODY:|$)/is);
-                    const bodyMatch = fullTranslated.match(/\n\s*BODY:\s*(.*)/is);
-
-                    if (titleMatch && bodyMatch) {
-                        translatedTitle = titleMatch[1].trim();
-                        translatedBody = bodyMatch[1].trim();
-                        if (titleEl) titleEl.innerText = translatedTitle;
-                        if (container.hasAttribute('post-title')) {
-                            container.setAttribute('post-title', translatedTitle);
+                if (hasBodyNow && parsed.body) {
+                    translatedBody = parsed.body;
+                    if (!translatedDiv) {
+                        translatedDiv = document.createElement('div');
+                        translatedDiv.className = 'vibe-translated-text-body';
+                        const slotName = textBody.getAttribute('slot');
+                        if (slotName) translatedDiv.setAttribute('slot', slotName);
+                        if (textBody.parentNode) {
+                            textBody.parentNode.insertBefore(translatedDiv, textBody.nextSibling);
                         }
-                    } else {
-                        translatedBody = fullTranslated;
                     }
-
-                    translatedDiv = document.createElement('div');
-                    translatedDiv.className = 'vibe-translated-text-body';
                     translatedDiv.innerText = translatedBody;
-
-                    if (textBody.appendChild && textBody !== container) {
-                        textBody.appendChild(translatedDiv);
-                    } else if (textBody.parentNode) {
-                        textBody.parentNode.insertBefore(translatedDiv, textBody.nextSibling);
-                    }
-                    bodyParagraphs.forEach(el => el.style.display = 'none');
+                    translatedDiv.style.display = 'block';
+                    textBody.style.display = 'none';
                 }
 
                 textSpan.innerText = 'Show Original';
@@ -516,7 +666,7 @@ function injectActionBarButton(container) {
                 console.error("Vibe translation failed:", response?.error || "Unknown error");
             }
         });
-    });
+    }, { capture: true });
 
     // Mount the button
     if (targetPlacement.nextSibling) {
@@ -532,11 +682,12 @@ function injectActionBarButton(container) {
 // Debounced observer to process posts and comments
 let isScheduled = false;
 function processAllContainers() {
-    // 1. Process main posts
-    const posts = document.querySelectorAll('shreddit-post, article, [data-testid="post-container"]');
+    // Only target the canonical Shreddit web components — never <article> or generic
+    // containers, as shreddit-post is nested inside article on the feed and would
+    // cause duplicate button injection.
+    const posts = document.querySelectorAll('shreddit-post');
     posts.forEach(post => injectActionBarButton(post));
 
-    // 2. Process all comments
     const comments = document.querySelectorAll('shreddit-comment');
     comments.forEach(comment => injectActionBarButton(comment));
 
@@ -554,3 +705,12 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Initial pass on script execution
 processAllContainers();
+
+// Timed retry passes — shreddit-comment shadow DOMs hydrate asynchronously after
+// the element is inserted into the light DOM. MutationObserver only watches light DOM,
+// so it never re-fires when Lit renders the shadow. These retries catch components
+// that weren't ready on the initial pass or observer trigger.
+// data-vibe-injected guards against duplicates.
+[300, 800, 1500, 3000].forEach(delay => {
+    setTimeout(processAllContainers, delay);
+});
