@@ -2,8 +2,11 @@
   "manifest_version": 3,
   "name": "Vibe Translator",
   "version": "1.1",
-  "description": "Translates Reddit posts and comments into authentic Indian regional dialects and slang (Hindi, Tamil, Telugu, and more) in conversational English script.",
+  "description": "Translates Reddit posts & comments into authentic Indian regional dialects (Hindi, Tamil, Telugu & more) in casual English letters.",
   "permissions": ["storage"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "host_permissions": [
     "*://*.reddit.com/*", 
     "https://generativelanguage.googleapis.com/*"

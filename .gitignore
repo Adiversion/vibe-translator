@@ -7,3 +7,8 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# Dependencies & Build artifacts
+node_modules/
+dist/
+*.zip

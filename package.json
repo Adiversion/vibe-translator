@@ -1,0 +1,14 @@
+{
+  "name": "vibe-translator",
+  "version": "1.1.0",
+  "description": "Vibe Translator Chrome Extension for Reddit",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-production.js",
+    "test:compliance": "node scripts/verify-webstore-compliance.js",
+    "verify:dist": "node scripts/verify-dist.js"
+  },
+  "devDependencies": {
+    "terser": "^5.30.0"
+  }
+}
