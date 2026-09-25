@@ -71,7 +71,7 @@
         .input-group {
             margin-bottom: 12px;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], select {
             width: 100%;
             background: #181b20;
             border: 1px solid #2b303c;
@@ -81,9 +81,14 @@
             color: #f8f9fa;
             outline: none;
             transition: border-color 0.2s;
+            cursor: pointer;
         }
-        input:focus {
+        input:focus, select:focus {
             border-color: #ff4500;
+        }
+        select option {
+            background: #181b20;
+            color: #f8f9fa;
         }
         .btn-row {
             display: flex;
@@ -143,12 +148,33 @@
         <img src="icons/icon48.png" alt="Vibe Translator Logo" class="logo">
         <div class="title-group">
             <h1>Vibe Translator</h1>
-            <p>Authentic Hinglish for Reddit</p>
+            <p>Authentic Regional Slang for Reddit</p>
             <div class="badge">
                 <span class="badge-dot"></span>
                 <span>Active on reddit.com</span>
             </div>
         </div>
+    </div>
+
+    <div class="section-label">
+        <span>Translate to</span>
+        <span style="font-size: 10px; color: #868e96;">English Letters</span>
+    </div>
+
+    <div class="input-group">
+        <select id="target-language-select">
+            <option value="hindi" selected>Hindi (English letters)</option>
+            <option value="tamil">Tamil (English letters)</option>
+            <option value="telugu">Telugu (English letters)</option>
+            <option value="malayalam">Malayalam (English letters)</option>
+            <option value="kannada">Kannada (English letters)</option>
+            <option value="bengali">Bengali (English letters)</option>
+            <option value="punjabi">Punjabi (English letters)</option>
+            <option value="marathi">Marathi (English letters)</option>
+            <option value="gujarati">Gujarati (English letters)</option>
+            <option value="odia">Odia (English letters)</option>
+            <option value="english">English (Casual internet)</option>
+        </select>
     </div>
 
     <div class="section-label">
