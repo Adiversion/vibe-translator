@@ -687,9 +687,16 @@ function injectActionBarButton(container) {
                     btn.classList.add('vibe-active');
                     isShowingTranslated = true;
                 } else {
-                    textSpan.innerText = 'Failed';
-                    btn.style.color = '#d93a00';
-                    console.error("Vibe translation failed:", response?.error || "Unknown error");
+                    if (response && response.limitReached) {
+                        textSpan.innerText = 'Limit (10/10)';
+                        btn.style.color = '#ff6b35';
+                        btn.title = "Daily trial limit reached (10/10 used today). Resets at midnight!";
+                        alert("Daily limit reached: You have used your 10 free trials for today. Resets at midnight!");
+                    } else {
+                        textSpan.innerText = 'Failed';
+                        btn.style.color = '#d93a00';
+                        console.error("Vibe translation failed:", response?.error || "Unknown error");
+                    }
                 }
             });
         } catch (err) {

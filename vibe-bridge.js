@@ -142,88 +142,120 @@ ${config.slangGuide}
 6. If the input contains "TITLE:" and "BODY:" sections, preserve "TITLE:" and "BODY:" headers in the output. Otherwise, output only the translated text. Do not add formal intros, conclusions, or quotation wrappers.`;
 }
 
+const MAX_DAILY_TRIALS = 10;
+
+function getTodayString() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "fetch_gemini") {
         
-        chrome.storage.sync.get(['customGeminiApiKey', 'targetLanguage'], (storageData) => {
-            const apiKey = storageData.customGeminiApiKey || DEFAULT_TEST_KEY;
-            const targetLang = (request.targetLanguage || storageData.targetLanguage || 'hindi').toLowerCase();
-            const config = LANGUAGE_CONFIGS[targetLang] || LANGUAGE_CONFIGS.hindi;
+        chrome.storage.local.get(['usageDate', 'usageCount'], (localUsage) => {
+            const today = getTodayString();
+            let currentCount = (localUsage.usageDate === today) ? (localUsage.usageCount || 0) : 0;
 
-            if (!apiKey) {
-                console.warn("Gemini API key is not configured.");
+            if (currentCount >= MAX_DAILY_TRIALS) {
+                console.warn(`Daily trial limit reached (${currentCount}/${MAX_DAILY_TRIALS})`);
                 sendResponse({
-                    error: "Gemini API key missing. Please enter your key in the extension popup.",
-                    translated: null
+                    error: `Daily trial limit reached (${MAX_DAILY_TRIALS}/${MAX_DAILY_TRIALS} used today). Resets at midnight!`,
+                    translated: null,
+                    limitReached: true,
+                    usedToday: currentCount,
+                    maxTrials: MAX_DAILY_TRIALS
                 });
                 return;
             }
 
-            const requestPayload = {
-                system_instruction: {
-                    parts: [{ text: buildSystemPrompt(targetLang).trim() }]
-                },
-                contents: [
-                    {
-                        role: "user",
-                        parts: [{ text: config.fewShotUser }]
-                    },
-                    {
-                        role: "model",
-                        parts: [{ text: config.fewShotModel }]
-                    },
-                    {
-                        role: "user",
-                        parts: [{ text: `Convert to ${config.name}:\n${request.text}` }]
-                    }
-                ],
-                generationConfig: {
-                    temperature: 0.3
-                },
-                safetySettings: [
-                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' }
-                ]
-            };
+            chrome.storage.sync.get(['customGeminiApiKey', 'targetLanguage'], (storageData) => {
+                const apiKey = storageData.customGeminiApiKey || DEFAULT_TEST_KEY;
+                const targetLang = (request.targetLanguage || storageData.targetLanguage || 'hindi').toLowerCase();
+                const config = LANGUAGE_CONFIGS[targetLang] || LANGUAGE_CONFIGS.hindi;
 
-            const CANDIDATE_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
-
-            (async () => {
-                let lastError = null;
-                for (const model of CANDIDATE_MODELS) {
-                    try {
-                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(requestPayload)
-                        });
-
-                        const data = await response.json();
-                        if (!response.ok) {
-                            const errorMsg = data.error?.message || `HTTP ${response.status}`;
-                            console.warn(`Model ${model} returned error: ${errorMsg}. Trying backup model...`);
-                            lastError = errorMsg;
-                            continue;
-                        }
-
-                        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content?.parts?.[0]?.text) {
-                            const translatedText = data.candidates[0].content.parts[0].text;
-                            sendResponse({ translated: translatedText, error: null });
-                            return;
-                        } else {
-                            lastError = "No translation candidate returned";
-                        }
-                    } catch (err) {
-                        console.warn(`Fetch error on ${model}:`, err);
-                        lastError = err.message;
-                    }
+                if (!apiKey) {
+                    console.warn("Gemini API key is not configured.");
+                    sendResponse({
+                        error: "Gemini API key missing. Please enter your key in the extension popup.",
+                        translated: null
+                    });
+                    return;
                 }
 
-                sendResponse({ error: lastError || "All Gemini models failed", translated: null });
-            })();
+                const requestPayload = {
+                    system_instruction: {
+                        parts: [{ text: buildSystemPrompt(targetLang).trim() }]
+                    },
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{ text: config.fewShotUser }]
+                        },
+                        {
+                            role: "model",
+                            parts: [{ text: config.fewShotModel }]
+                        },
+                        {
+                            role: "user",
+                            parts: [{ text: `Convert to ${config.name}:\n${request.text}` }]
+                        }
+                    ],
+                    generationConfig: {
+                        temperature: 0.3
+                    },
+                    safetySettings: [
+                        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+                        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+                        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+                        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' }
+                    ]
+                };
+
+                const CANDIDATE_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+
+                (async () => {
+                    let lastError = null;
+                    for (const model of CANDIDATE_MODELS) {
+                        try {
+                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                            const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(requestPayload)
+                            });
+
+                            const data = await response.json();
+                            if (!response.ok) {
+                                const errorMsg = data.error?.message || `HTTP ${response.status}`;
+                                console.warn(`Model ${model} returned error: ${errorMsg}. Trying backup model...`);
+                                lastError = errorMsg;
+                                continue;
+                            }
+
+                            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content?.parts?.[0]?.text) {
+                                const translatedText = data.candidates[0].content.parts[0].text;
+                                currentCount += 1;
+                                chrome.storage.local.set({ usageDate: today, usageCount: currentCount });
+
+                                sendResponse({
+                                    translated: translatedText,
+                                    error: null,
+                                    usedToday: currentCount,
+                                    maxTrials: MAX_DAILY_TRIALS
+                                });
+                                return;
+                            } else {
+                                lastError = "No translation candidate returned";
+                            }
+                        } catch (err) {
+                            console.warn(`Fetch error on ${model}:`, err);
+                            lastError = err.message;
+                        }
+                    }
+
+                    sendResponse({ error: lastError || "All Gemini models failed", translated: null });
+                })();
+            });
         });
 
         return true;

@@ -12,27 +12,27 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            width: 320px;
+            width: 340px;
             background: #0f1115;
             color: #f1f3f5;
-            padding: 18px;
+            padding: 16px;
         }
         .header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 14px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
             border-bottom: 1px solid #23272f;
         }
         .logo {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
         }
         .title-group h1 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #ffffff;
             letter-spacing: -0.2px;
@@ -40,7 +40,7 @@
         .title-group p {
             font-size: 11px;
             color: #949ca8;
-            margin-top: 2px;
+            margin-top: 1px;
         }
         .badge {
             display: inline-flex;
@@ -52,7 +52,7 @@
             color: #24a0ed;
             padding: 2px 7px;
             border-radius: 9999px;
-            margin-top: 4px;
+            margin-top: 3px;
         }
         .badge-dot {
             width: 6px;
@@ -61,12 +61,13 @@
             background: #00d2ff;
         }
         .section-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #ced4da;
             margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .input-group {
             margin-bottom: 12px;
@@ -89,6 +90,105 @@
         select option {
             background: #181b20;
             color: #f8f9fa;
+        }
+        /* Daily Trials Card */
+        .trials-card {
+            background: #14171d;
+            border: 1px solid #23272f;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+        .trials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .trials-tag {
+            background: rgba(255, 69, 0, 0.15);
+            color: #ff6b35;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #23272f;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #24a0ed, #ff4500);
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+        .trials-subtext {
+            font-size: 10px;
+            color: #868e96;
+            display: flex;
+            justify-content: space-between;
+        }
+        /* Get Key Button */
+        .get-key-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background: linear-gradient(135deg, #1a73e8, #00d2ff);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 9px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+        }
+        .get-key-btn:hover {
+            opacity: 0.93;
+            transform: translateY(-1px);
+        }
+        /* Instructions Card */
+        .instructions-card {
+            background: #14171d;
+            border: 1px solid #23272f;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            color: #a0aab8;
+            line-height: 1.45;
+        }
+        .instructions-title {
+            font-weight: 700;
+            color: #ced4da;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .instructions-card ol {
+            padding-left: 18px;
+            margin: 0;
+        }
+        .instructions-card li {
+            margin-bottom: 4px;
+        }
+        .instructions-card li:last-child {
+            margin-bottom: 0;
+        }
+        .instructions-card strong {
+            color: #f1f3f5;
         }
         .btn-row {
             display: flex;
@@ -134,8 +234,8 @@
             color: #a0aab8;
         }
         .footer {
-            margin-top: 14px;
-            padding-top: 12px;
+            margin-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid #23272f;
             font-size: 10px;
             color: #6c757d;
@@ -156,11 +256,11 @@
         </div>
     </div>
 
+    <!-- Target Language -->
     <div class="section-label">
         <span>Translate to</span>
         <span style="font-size: 10px; color: #868e96;">English Letters</span>
     </div>
-
     <div class="input-group">
         <select id="target-language-select">
             <option value="hindi" selected>Hindi (English letters)</option>
@@ -177,13 +277,56 @@
         </select>
     </div>
 
-    <div class="section-label">
-        <span>Gemini API Key</span>
-        <span style="font-size: 10px; color: #868e96;">Optional</span>
+    <!-- Daily Trials Meter (10 trials a day fixed) -->
+    <div class="trials-card">
+        <div class="trials-header">
+            <span>Daily Trial Quota</span>
+            <span id="trials-badge" class="trials-tag">10 Trials / Day</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="trials-progress" class="progress-bar-fill"></div>
+        </div>
+        <div class="trials-subtext">
+            <span id="trials-used-text">0 / 10 used today</span>
+            <span>Resets daily at midnight</span>
+        </div>
     </div>
 
+    <!-- Get Free Key Button -->
+    <button id="get-key-btn" class="get-key-btn" type="button">
+        <span>Get Free API Key from Google AI Studio</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+    </button>
+
+    <!-- Instructions Guide -->
+    <div class="instructions-card">
+        <div class="instructions-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#24a0ed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>How to setup in 30 seconds:</span>
+        </div>
+        <ol>
+            <li>Click <strong>"Get Free API Key"</strong> above to open Google AI Studio.</li>
+            <li>Sign in with your Google account & click <strong>"Create API key"</strong>.</li>
+            <li>Copy your key, paste it into the box below, and click <strong>"Save Key"</strong>.</li>
+        </ol>
+        <div style="margin-top: 6px; font-size: 10px; color: #4cd964;">✓ 100% Free • No credit card required</div>
+    </div>
+
+    <!-- API Key Input -->
+    <div class="section-label">
+        <span>Gemini API Key</span>
+        <span style="font-size: 10px; color: #868e96;">Paste here</span>
+    </div>
     <div class="input-group">
-        <input type="password" id="api-key-input" placeholder="Built-in testing key active" autocomplete="off">
+        <input type="password" id="api-key-input" placeholder="Paste your AI Studio key here" autocomplete="off">
     </div>
 
     <div class="btn-row">
@@ -191,7 +334,7 @@
         <button id="reset-btn" class="btn-secondary">Reset to Default</button>
     </div>
 
-    <div id="status-msg" class="status-msg status-info">Built-in local testing key is enabled.</div>
+    <div id="status-msg" class="status-msg status-info">Ready • 10 trials available per day.</div>
 
     <div class="footer">
         Gemini 3.5 Flash Lite • Natural Slang & Emotion
