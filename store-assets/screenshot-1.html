@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Translator — Chrome Web Store Official Screenshot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 1280px;
+            height: 800px;
+            overflow: hidden;
+            background: #090b10;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #f1f5f9;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 36px 48px 30px 48px;
+        }
+
+        /* Ambient glowing meshes */
+        .ambient-glow-1 {
+            position: absolute;
+            top: -120px;
+            left: 20%;
+            width: 700px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(255, 69, 0, 0.12) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            top: 25%;
+            right: -80px;
+            width: 650px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(36, 160, 237, 0.12) 0%, transparent 70%);
+            filter: blur(90px);
+            pointer-events: none;
+        }
+
+        .ambient-glow-3 {
+            position: absolute;
+            bottom: -100px;
+            left: -50px;
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(160, 32, 240, 0.08) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        /* Top Header Bar */
+        .top-header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .brand-cluster {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            box-shadow: 0 4px 18px rgba(255, 69, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 22px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .brand-titles h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            background: rgba(36, 160, 237, 0.18);
+            color: #24a0ed;
+            border: 1px solid rgba(36, 160, 237, 0.35);
+        }
+
+        .brand-titles p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .highlight-pills {
+            display: flex;
+            gap: 10px;
+        }
+
+        .feature-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #e2e8f0;
+            backdrop-filter: blur(8px);
+        }
+
+        .feature-pill svg {
+            color: #ff6b35;
+        }
+
+        /* Main Workspace Stage */
+        .workspace-stage {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 28px;
+            align-items: start;
+            flex: 1;
+        }
+
+        /* ── Reddit Post Mockup (Left Side) ── */
+        .reddit-card {
+            background: #12141a;
+            border: 1px solid #232733;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .reddit-post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reddit-sub-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ff4500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: #ffffff;
+        }
+
+        .reddit-sub-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reddit-sub-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .reddit-sub-author {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .reddit-post-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.35;
+            letter-spacing: -0.2px;
+        }
+
+        .reddit-flair {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .reddit-post-body {
+            background: #181b24;
+            border-left: 4px solid #ff4500;
+            border-radius: 0 10px 10px 0;
+            padding: 18px 20px;
+            font-size: 13.5px;
+            line-height: 1.65;
+            color: #cbd5e1;
+        }
+
+        .reddit-post-body p {
+            margin-bottom: 12px;
+        }
+
+        .reddit-post-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .reddit-highlight-slang {
+            background: rgba(255, 69, 0, 0.15);
+            color: #ff8c00;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .reddit-highlight-english {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .reddit-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid #1e2330;
+        }
+
+        .reddit-actions-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reddit-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1a1e27;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 9999px;
+            border: 1px solid #282e3c;
+        }
+
+        .vibe-action-btn-active {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(36, 160, 237, 0.15);
+            color: #24a0ed;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 9999px;
+            border: 1.5px solid rgba(36, 160, 237, 0.45);
+            box-shadow: 0 0 20px rgba(36, 160, 237, 0.2);
+        }
+
+        /* ── Extension Popup Mockup (Right Side) ── */
+        .popup-window {
+            background: #0f1115;
+            border: 1.5px solid #2b303c;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 69, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            position: relative;
+        }
+
+        .popup-window::before {
+            content: "Extension Popup UI";
+            position: absolute;
+            top: -24px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #24a0ed;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #23272f;
+        }
+
+        .popup-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff4500, #ff8c00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 17px;
+            color: #ffffff;
+        }
+
+        .popup-titles h2 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .popup-titles p {
+            font-size: 10px;
+            color: #949ca8;
+        }
+
+        .popup-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            background: rgba(36, 160, 237, 0.15);
+            color: #24a0ed;
+            padding: 1px 6px;
+            border-radius: 9999px;
+            margin-top: 2px;
+        }
+
+        .popup-section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #ced4da;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-select {
+            width: 100%;
+            background: #181b20;
+            border: 1px solid #2b303c;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #f8f9fa;
+        }
+
+        .popup-trials-box {
+            background: #14171d;
+            border: 1px solid #23272f;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+
+        .popup-trials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .popup-trials-tag {
+            background: rgba(255, 69, 0, 0.15);
+            color: #ff6b35;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 9.5px;
+            font-weight: 700;
+        }
+
+        .popup-progress-bg {
+            width: 100%;
+            height: 5px;
+            background: #23272f;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .popup-progress-fill {
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #24a0ed, #ff4500);
+            border-radius: 9999px;
+        }
+
+        .popup-trials-sub {
+            font-size: 9.5px;
+            color: #868e96;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .popup-get-key {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #1a73e8, #00d2ff);
+            color: #ffffff;
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 8px 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.25);
+        }
+
+        .popup-guide-box {
+            background: #14171d;
+            border: 1px solid #23272f;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 10px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .popup-guide-title {
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+
+        /* Bottom Feature Highlights */
+        .bottom-features {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .feature-card {
+            background: rgba(18, 20, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .feature-icon-bubble {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255, 69, 0, 0.12);
+            color: #ff6b35;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feature-text h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .feature-text p {
+            font-size: 10.5px;
+            color: #94a3b8;
+            margin-top: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+    <div class="ambient-glow-3"></div>
+
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="brand-cluster">
+            <div class="brand-logo">VT</div>
+            <div class="brand-titles">
+                <h1>Vibe Translator <span class="brand-tag">v1.1</span></h1>
+                <p>Translates Indian Reddit Posts & Comments into Natural Regional Slang (Latin Script)</p>
+            </div>
+        </div>
+        <div class="highlight-pills">
+            <div class="feature-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Zero Hallucination Slang</span>
+            </div>
+            <div class="feature-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>100% Free Gemini API</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace Stage -->
+    <div class="workspace-stage">
+        <!-- Left: Reddit Live Translation Card -->
+        <div class="reddit-card">
+            <div class="reddit-post-header">
+                <div class="reddit-sub-icon">r/</div>
+                <div class="reddit-sub-meta">
+                    <span class="reddit-sub-title">r/tamilyapping • 3h ago</span>
+                    <span class="reddit-sub-author">u/Funny_Jellyfish_7336</span>
+                </div>
+            </div>
+
+            <h2 class="reddit-post-title">Judge mat karo thoda pyaar se bolke jao na😭🥀??</h2>
+
+            <div class="reddit-flair">🎤 Yap Session (rant, confession and yap)</div>
+
+            <div class="reddit-post-body">
+                <p>Main Tamil girl hoon <span class="reddit-highlight-english">born and brought up in bangalore</span> toh thoda Tamil thoda kannada ..toh <span class="reddit-highlight-slang">scene kya hai na...</span></p>
+                <p><span class="reddit-highlight-english">Do u ppl actually judge the girls staying in bangalore..</span>mere friends almost koi 5 to 10 members jo tamilnadu mein rehte hain Mujhse puchte hain "arey bangalore mein hai toh tu pub jaati hogi <span class="reddit-highlight-slang">daaru peeti hogi</span> pakka committed hogi" <span class="reddit-highlight-english">I mean wtf😭?</span> Dekha tune yaar? Kyu aisa bolte hain not only my friends mujhe online jo dost bane strangers wo bhi aise hi puchte hain...<span class="reddit-highlight-english">y do ppl judge us😭?? It hurts brooo!!!!</span></p>
+            </div>
+
+            <div class="reddit-action-bar">
+                <div class="reddit-actions-left">
+                    <div class="reddit-pill-btn">⬆ 22 ⬇</div>
+                    <div class="reddit-pill-btn">💬 119</div>
+                    <div class="reddit-pill-btn">🔄 Share</div>
+                </div>
+                <div class="vibe-action-btn-active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                        <path d="M5 8l6 6"></path>
+                        <path d="M4 14l6-6 2-3"></path>
+                        <path d="M2 5h12"></path>
+                        <path d="M7 2h1"></path>
+                        <path d="M22 22l-5-10-5 10"></path>
+                        <path d="M14 18h6"></path>
+                    </svg>
+                    <span>Show Original</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Real Extension Popup UI -->
+        <div class="popup-window">
+            <div class="popup-header">
+                <div class="popup-logo">VT</div>
+                <div class="popup-titles">
+                    <h2>Vibe Translator</h2>
+                    <p>Authentic Regional Slang for Reddit</p>
+                    <span class="popup-badge">● Active on reddit.com</span>
+                </div>
+            </div>
+
+            <div class="popup-section-label">
+                <span>Translate to</span>
+                <span style="font-size: 9.5px; color: #64748b;">English Letters</span>
+            </div>
+            <div class="popup-select">
+                Hindi (English letters) ▾
+            </div>
+
+            <div class="popup-trials-box">
+                <div class="popup-trials-header">
+                    <span>Daily Trial Quota</span>
+                    <span class="popup-trials-tag">6 Left Today</span>
+                </div>
+                <div class="popup-progress-bg">
+                    <div class="popup-progress-fill"></div>
+                </div>
+                <div class="popup-trials-sub">
+                    <span>4 / 10 used today</span>
+                    <span>Resets midnight</span>
+                </div>
+            </div>
+
+            <div class="popup-get-key">
+                <span>Get Free API Key from Google AI Studio</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </div>
+
+            <div class="popup-guide-box">
+                <div class="popup-guide-title">⚡ How to setup in 30 seconds:</div>
+                <div>1. Click button above to open AI Studio</div>
+                <div>2. Click "Create API Key" & copy it</div>
+                <div>3. Paste into key box & click Save</div>
+                <div style="margin-top: 4px; color: #4cd964; font-size: 9.5px; font-weight: 600;">✓ 100% Free • No credit card required</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Feature Highlights -->
+    <div class="bottom-features">
+        <div class="feature-card">
+            <div class="feature-icon-bubble">⚡</div>
+            <div class="feature-text">
+                <h3>1-Click In-Page Toggle</h3>
+                <p>Native Lit Web Component button</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon-bubble">🎯</div>
+            <div class="feature-text">
+                <h3>Slang & Vibe Matched</h3>
+                <p>Preserves internet tone & emojis</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon-bubble">🇮🇳</div>
+            <div class="feature-text">
+                <h3>11 Indian Dialects</h3>
+                <p>Hindi, Tamil, Telugu, and more</p>
+            </div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon-bubble">🛡️</div>
+            <div class="feature-text">
+                <h3>10 Trials/Day Quota</h3>
+                <p>Free tier protection & BYOK ready</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
