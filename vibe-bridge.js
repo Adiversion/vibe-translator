@@ -34,8 +34,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 return;
             }
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
-
             const requestPayload = {
                 system_instruction: {
                     parts: [{ text: SYSTEM_INSTRUCTIONS.trim() }]
@@ -71,30 +69,42 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 ]
             };
 
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestPayload)
-            })
-            .then(async (response) => {
-                const data = await response.json();
-                if (!response.ok) {
-                    console.error("Gemini API Error Response:", data);
-                    sendResponse({ error: data.error?.message || `HTTP ${response.status}`, translated: null });
-                    return;
+            const CANDIDATE_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+
+            (async () => {
+                let lastError = null;
+                for (const model of CANDIDATE_MODELS) {
+                    try {
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestPayload)
+                        });
+
+                        const data = await response.json();
+                        if (!response.ok) {
+                            const errorMsg = data.error?.message || `HTTP ${response.status}`;
+                            console.warn(`Model ${model} returned error: ${errorMsg}. Trying backup model...`);
+                            lastError = errorMsg;
+                            continue;
+                        }
+
+                        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content?.parts?.[0]?.text) {
+                            const translatedText = data.candidates[0].content.parts[0].text;
+                            sendResponse({ translated: translatedText, error: null });
+                            return;
+                        } else {
+                            lastError = "No translation candidate returned";
+                        }
+                    } catch (err) {
+                        console.warn(`Fetch error on ${model}:`, err);
+                        lastError = err.message;
+                    }
                 }
-                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content?.parts?.[0]?.text) {
-                    const translatedText = data.candidates[0].content.parts[0].text;
-                    sendResponse({ translated: translatedText });
-                } else {
-                    console.warn("No candidate text in response:", data);
-                    sendResponse({ error: "No translation candidate returned", translated: null });
-                }
-            })
-            .catch(error => {
-                console.error("Fetch / Network Error:", error);
-                sendResponse({ error: error.message, translated: null });
-            });
+
+                sendResponse({ error: lastError || "All Gemini models failed", translated: null });
+            })();
         });
 
         return true;
