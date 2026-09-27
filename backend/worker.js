@@ -344,10 +344,15 @@ export default {
                     try {
                         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${masterApiKey}`;
                         
+                        const headers = {
+                            'Content-Type': 'application/json',
+                            'x-goog-api-key': masterApiKey
+                        };
+
                         // Try with zero thinking budget first
                         let geminiResp = await fetch(apiUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: headers,
                             body: JSON.stringify(buildPayload(true))
                         });
 
@@ -360,7 +365,7 @@ export default {
                         )) {
                             geminiResp = await fetch(apiUrl, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: headers,
                                 body: JSON.stringify(buildPayload(false))
                             });
                             data = await geminiResp.json();
