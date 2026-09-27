@@ -1,0 +1,13 @@
+name = "vibe-translator-api"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+[vars]
+UPGRADE_URL = "https://kasyhq.com/pricing?product=vibe_translator"
+
+# To enable persistent multi-node rate limiting across all global Cloudflare edge datacenters:
+# 1. Run: npx wrangler kv namespace create RATE_LIMIT_KV
+# 2. Paste the returned id below:
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT_KV"
+# id = "YOUR_KV_NAMESPACE_ID_HERE"

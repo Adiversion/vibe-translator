@@ -135,11 +135,13 @@ async function processFile(src, dest) {
 }
 
 const FILES_TO_PACKAGE = [
+  'config.js',
   'popup.html',
   'popup.js',
   'styles.css',
   'vibe-bridge.js',
   'vibe-inject.js',
+  'content/kasyhq-bridge.js',
   'icons/icon16.png',
   'icons/icon32.png',
   'icons/icon48.png',
@@ -168,7 +170,7 @@ const TARGETS = {
     manifestGenerator: (base) => {
       const m = JSON.parse(JSON.stringify(base));
       m.background = {
-        scripts: ['vibe-bridge.js']
+        scripts: ['config.js', 'vibe-bridge.js']
       };
       m.browser_specific_settings = {
         gecko: {

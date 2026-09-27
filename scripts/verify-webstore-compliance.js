@@ -188,7 +188,7 @@ function runComplianceChecks() {
 
   // ── TEST 9: Source Code Static Analysis (eval, obfuscation, insecure HTTP) ──
   const JS_EXTENSIONS = ['.js', '.mjs', '.html'];
-  const SCAN_FILES = ['vibe-bridge.js', 'vibe-inject.js', 'popup.js', 'popup.html'];
+  const SCAN_FILES = ['config.js', 'vibe-bridge.js', 'vibe-inject.js', 'popup.js', 'popup.html'];
   
   let scanErrors = 0;
   function scanFile(filePath) {

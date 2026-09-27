@@ -23,6 +23,32 @@
     user-select: none;
 }
 
+/* Style B: Flat / Search / Mobile Inline Style */
+.vibe-translate-action-btn.vibe-flat-style {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    background: var(--color-neutral-background-weak, rgba(0, 0, 0, 0.05));
+    border-radius: 9999px;
+    align-self: center;
+    display: inline-flex;
+    vertical-align: middle;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.vibe-translate-action-btn.vibe-flat-style .vibe-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px !important;
+}
+
+.vibe-translate-action-btn.vibe-flat-style .vibe-btn-text {
+    font-size: 11px !important;
+}
+
 .vibe-translate-action-btn:hover {
     background-color: var(--color-neutral-background-hover, rgba(0, 0, 0, 0.08));
 }
@@ -99,4 +125,147 @@
     border-left: 3px solid #ff4500;
     background: var(--color-neutral-background-weak, rgba(0, 0, 0, 0.03));
     border-radius: 0 8px 8px 0;
+}
+
+/* ── In-Page Pro Upgrade Modal ── */
+.vibe-upgrade-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    animation: vibe-fade-in 0.2s ease forwards;
+}
+
+.vibe-upgrade-dialog {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    padding: 24px;
+    width: 380px;
+    max-width: 90vw;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+    color: #f0f6fc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: left;
+    box-sizing: border-box;
+    animation: vibe-scale-in 0.2s ease forwards;
+}
+
+.vibe-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 69, 0, 0.15);
+    color: #ff6b35;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+}
+
+.vibe-modal-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff4500;
+}
+
+.vibe-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.vibe-modal-desc {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+    margin: 0 0 14px 0;
+}
+
+.vibe-modal-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    font-size: 11px;
+    color: #c9d1d9;
+    line-height: 1.6;
+}
+
+.vibe-modal-features li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.vibe-modal-features li span {
+    color: #ff6b35;
+    font-weight: 700;
+}
+
+.vibe-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vibe-modal-upgrade-btn {
+    background: #ff4500;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-radius: 8px;
+    min-height: 44px;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.vibe-modal-upgrade-btn:hover {
+    background: #e03d00;
+    transform: translateY(-1px);
+}
+
+.vibe-modal-dismiss-btn {
+    background: transparent;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    min-height: 38px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    width: 100%;
+}
+
+.vibe-modal-dismiss-btn:hover {
+    color: #f0f6fc;
+    border-color: #8b949e;
+}
+
+@keyframes vibe-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes vibe-scale-in {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }

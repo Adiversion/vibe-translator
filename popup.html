@@ -5,341 +5,662 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vibe Translator</title>
     <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-surface: #111726;
+            --bg-elevated: #161f33;
+            --border-subtle: #1e293b;
+            --border-focus: #ff5722;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --brand-orange: #ff5722;
+            --brand-orange-hover: #f4511e;
+            --pro-emerald: #10b981;
+            --pro-emerald-bg: rgba(16, 185, 129, 0.08);
+            --pro-emerald-border: rgba(16, 185, 129, 0.25);
+            --danger-red: #ef4444;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
+
         body {
             width: 340px;
-            background: #0f1115;
-            color: #f1f3f5;
+            background: var(--bg-base);
+            color: var(--text-primary);
             padding: 16px;
+            overflow-x: hidden;
         }
-        .header {
+
+        /* ── Header ── */
+        .app-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             margin-bottom: 14px;
             padding-bottom: 12px;
-            border-bottom: 1px solid #23272f;
+            border-bottom: 1px solid var(--border-subtle);
         }
-        .logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(255, 69, 0, 0.25);
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .title-group h1 {
-            font-size: 15px;
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(255, 87, 34, 0.25);
+            flex-shrink: 0;
+        }
+
+        .brand-title-wrap h1 {
+            font-size: 14px;
             font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.2px;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+            line-height: 1.2;
         }
-        .title-group p {
+
+        .brand-title-wrap p {
             font-size: 11px;
-            color: #949ca8;
-            margin-top: 1px;
+            color: var(--text-secondary);
+            line-height: 1.2;
+            margin-top: 2px;
         }
-        .badge {
+
+        .status-pill {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             font-size: 10px;
             font-weight: 600;
-            background: rgba(36, 160, 237, 0.15);
-            color: #24a0ed;
-            padding: 2px 7px;
+            padding: 3px 8px;
             border-radius: 9999px;
-            margin-top: 3px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--pro-emerald);
+            border: 1px solid var(--pro-emerald-border);
+            white-space: nowrap;
         }
-        .badge-dot {
+
+        .status-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #00d2ff;
+            background: var(--pro-emerald);
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
         }
-        .section-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #ced4da;
-            margin-bottom: 6px;
+
+        /* ── User Account Bar ── */
+        .account-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-        .input-group {
-            margin-bottom: 12px;
-        }
-        input[type="text"], input[type="password"], select {
-            width: 100%;
-            background: #181b20;
-            border: 1px solid #2b303c;
-            border-radius: 8px;
+            justify-content: space-between;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 9px;
             padding: 8px 10px;
-            font-size: 12px;
-            color: #f8f9fa;
-            outline: none;
-            transition: border-color 0.2s;
+            margin-bottom: 14px;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .account-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            border: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+        }
+
+        .account-email {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 190px;
+        }
+
+        .btn-signout {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-decoration: none;
             cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 4px;
+            transition: color 0.15s, background 0.15s;
+            flex-shrink: 0;
         }
-        input:focus, select:focus {
-            border-color: #ff4500;
+
+        .btn-signout:hover {
+            color: var(--danger-red);
+            background: rgba(239, 68, 68, 0.1);
         }
-        select option {
-            background: #181b20;
-            color: #f8f9fa;
+
+        /* ── Dialect Selector ── */
+        .field-group {
+            margin-bottom: 14px;
         }
-        /* Daily Trials Card */
-        .trials-card {
-            background: #14171d;
-            border: 1px solid #23272f;
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-bottom: 12px;
-        }
-        .trials-header {
+
+        .field-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
             margin-bottom: 6px;
         }
-        .trials-tag {
-            background: rgba(255, 69, 0, 0.15);
-            color: #ff6b35;
+
+        .field-sublabel {
+            font-size: 9px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            letter-spacing: normal;
+            text-transform: none;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .custom-select {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 9px;
+            padding: 9px 32px 9px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .custom-select:hover {
+            border-color: #334155;
+        }
+
+        .custom-select:focus {
+            border-color: var(--brand-orange);
+            box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.15);
+        }
+
+        .select-chevron {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-tertiary);
+        }
+
+        /* ── Pro Active Card (Linear-Grade Luxury Card) ── */
+        .pro-card {
+            display: none;
+            background: var(--pro-emerald-bg);
+            border: 1px solid var(--pro-emerald-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pro-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .pro-tier-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--pro-emerald);
+            letter-spacing: 0.3px;
+        }
+
+        .pro-tier-pill svg {
+            width: 13px;
+            height: 13px;
+            fill: currentColor;
+        }
+
+        .pro-status-badge {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--pro-emerald);
         }
-        .progress-bar-bg {
-            width: 100%;
-            height: 6px;
-            background: #23272f;
-            border-radius: 9999px;
-            overflow: hidden;
-            margin-bottom: 5px;
+
+        .pro-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
         }
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #24a0ed, #ff4500);
-            border-radius: 9999px;
-            transition: width 0.3s ease;
+
+        /* ── Quota Meter (Free Users Only) ── */
+        .quota-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
         }
-        .trials-subtext {
-            font-size: 10px;
-            color: #868e96;
+
+        .quota-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-        /* Get Key Button */
-        .get-key-btn {
+
+        .quota-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(255, 87, 34, 0.12);
+            color: #ff7043;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+            background: var(--bg-elevated);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--brand-orange);
+            border-radius: 9999px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .quota-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-tertiary);
+        }
+
+        /* ── Upgrade Card (Free Users Only) ── */
+        .upgrade-card {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255, 87, 34, 0.35);
+            border-radius: 10px;
+            padding: 13px 14px;
+            margin-bottom: 12px;
+        }
+
+        .upgrade-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pro-pill {
+            background: var(--brand-orange);
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .upgrade-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: #ff8a65;
+        }
+
+        .features-list {
+            list-style: none;
+            margin: 8px 0 12px 0;
+            padding: 0;
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .features-list svg {
+            width: 12px;
+            height: 12px;
+            color: var(--pro-emerald);
+            flex-shrink: 0;
+        }
+
+        .btn-upgrade {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
             width: 100%;
-            background: linear-gradient(135deg, #1a73e8, #00d2ff);
+            height: 38px;
+            background: var(--brand-orange);
             color: #ffffff;
-            text-decoration: none;
             font-size: 12px;
-            font-weight: 600;
-            padding: 9px 12px;
+            font-weight: 700;
             border-radius: 8px;
-            margin-bottom: 12px;
-            cursor: pointer;
             border: none;
-            transition: opacity 0.2s ease, transform 0.15s ease;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
         }
-        .get-key-btn:hover {
-            opacity: 0.93;
+
+        .btn-upgrade:hover {
+            background: var(--brand-orange-hover);
             transform: translateY(-1px);
         }
-        /* Instructions Card */
-        .instructions-card {
-            background: #14171d;
-            border: 1px solid #23272f;
-            border-radius: 8px;
-            padding: 10px 12px;
-            margin-bottom: 12px;
-            font-size: 11px;
-            color: #a0aab8;
-            line-height: 1.45;
+
+        /* ── Login Gate (When Not Signed In) ── */
+        #login-view {
+            display: none;
+            text-align: center;
+            padding: 14px 4px;
         }
-        .instructions-title {
+
+        .login-hero {
+            margin-bottom: 18px;
+        }
+
+        .login-title {
+            font-size: 15px;
             font-weight: 700;
-            color: #ced4da;
+            color: var(--text-primary);
             margin-bottom: 6px;
+        }
+
+        .login-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .btn-google {
             display: flex;
             align-items: center;
-            gap: 5px;
-        }
-        .instructions-card ol {
-            padding-left: 18px;
-            margin: 0;
-        }
-        .instructions-card li {
-            margin-bottom: 4px;
-        }
-        .instructions-card li:last-child {
-            margin-bottom: 0;
-        }
-        .instructions-card strong {
-            color: #f1f3f5;
-        }
-        .btn-row {
-            display: flex;
-            gap: 8px;
-        }
-        button {
-            flex: 1;
-            padding: 8px 12px;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            height: 42px;
+            background: #ffffff;
+            color: #0f172a;
             font-size: 12px;
             font-weight: 600;
             border-radius: 8px;
+            border: 1px solid #cbd5e1;
             cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
+            transition: background 0.15s, transform 0.15s;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #ff4500, #ff6b35);
-            color: #ffffff;
-        }
-        .btn-primary:hover {
-            opacity: 0.92;
+
+        .btn-google:hover {
+            background: #f8fafc;
             transform: translateY(-1px);
         }
-        .btn-secondary {
-            background: #23272f;
-            color: #ced4da;
+
+        .btn-google svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
         }
-        .btn-secondary:hover {
-            background: #2c323c;
-            color: #ffffff;
-        }
+
+        /* ── Status Toast ── */
         .status-msg {
             font-size: 11px;
-            margin-top: 10px;
+            margin-top: 6px;
             text-align: center;
-            min-height: 16px;
-            transition: opacity 0.2s;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: none;
         }
-        .status-success {
-            color: #4cd964;
+
+        .status-msg.active {
+            display: block;
         }
+
         .status-info {
-            color: #a0aab8;
+            color: var(--text-secondary);
+            background: var(--bg-surface);
         }
-        .footer {
-            margin-top: 12px;
+
+        .status-success {
+            color: var(--pro-emerald);
+            background: var(--pro-emerald-bg);
+            border: 1px solid var(--pro-emerald-border);
+        }
+
+        .status-error {
+            color: var(--danger-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* ── Footer ── */
+        .app-footer {
+            margin-top: 14px;
             padding-top: 10px;
-            border-top: 1px solid #23272f;
+            border-top: 1px solid var(--border-subtle);
             font-size: 10px;
-            color: #6c757d;
-            text-align: center;
+            color: var(--text-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .app-footer a:hover {
+            color: var(--text-primary);
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="icons/icon48.png" alt="Vibe Translator Logo" class="logo">
-        <div class="title-group">
-            <h1>Vibe Translator</h1>
-            <p>Authentic Regional Slang for Reddit</p>
-            <div class="badge">
-                <span class="badge-dot"></span>
-                <span>Active on reddit.com</span>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="brand-group">
+            <img src="icons/icon48.png" alt="Vibe Translator Logo" class="brand-logo">
+            <div class="brand-title-wrap">
+                <h1>Vibe Translator</h1>
+                <p>Authentic Regional Slang</p>
             </div>
         </div>
-    </div>
-
-    <!-- Target Language -->
-    <div class="section-label">
-        <span>Translate to</span>
-        <span style="font-size: 10px; color: #868e96;">English Letters</span>
-    </div>
-    <div class="input-group">
-        <select id="target-language-select">
-            <option value="hindi" selected>Hindi (English letters)</option>
-            <option value="tamil">Tamil (English letters)</option>
-            <option value="telugu">Telugu (English letters)</option>
-            <option value="malayalam">Malayalam (English letters)</option>
-            <option value="kannada">Kannada (English letters)</option>
-            <option value="bengali">Bengali (English letters)</option>
-            <option value="punjabi">Punjabi (English letters)</option>
-            <option value="marathi">Marathi (English letters)</option>
-            <option value="gujarati">Gujarati (English letters)</option>
-            <option value="odia">Odia (English letters)</option>
-            <option value="english">English (Casual internet)</option>
-        </select>
-    </div>
-
-    <!-- Daily Trials Meter (10 trials a day fixed) -->
-    <div class="trials-card">
-        <div class="trials-header">
-            <span>Daily Trial Quota</span>
-            <span id="trials-badge" class="trials-tag">10 Trials / Day</span>
+        <div class="status-pill">
+            <span class="status-dot"></span>
+            <span>Active</span>
         </div>
-        <div class="progress-bar-bg">
-            <div id="trials-progress" class="progress-bar-fill"></div>
-        </div>
-        <div class="trials-subtext">
-            <span id="trials-used-text">0 / 10 used today</span>
-            <span>Resets daily at midnight</span>
-        </div>
-    </div>
+    </header>
 
-    <!-- Get Free Key Button -->
-    <button id="get-key-btn" class="get-key-btn" type="button">
-        <span>Get Free API Key from Google AI Studio</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-        </svg>
-    </button>
+    <!-- ── 1. LOGIN GATE VIEW ── -->
+    <div id="login-view">
+        <div class="login-hero">
+            <h2 class="login-title">Sign in to Get Started</h2>
+            <p class="login-desc">Connect your Google account to claim <strong>5 free daily translations</strong> on Reddit.</p>
+        </div>
 
-    <!-- Instructions Guide -->
-    <div class="instructions-card">
-        <div class="instructions-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#24a0ed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        <button id="google-login-btn" class="btn-google" type="button">
+            <svg viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-            <span>How to setup in 30 seconds:</span>
+            <span>Continue with Google</span>
+        </button>
+    </div>
+
+    <!-- ── 2. MAIN APPLICATION VIEW ── -->
+    <div id="app-view">
+        <!-- Account Row -->
+        <div class="account-bar">
+            <div class="account-info">
+                <div class="account-avatar" id="account-avatar">U</div>
+                <span class="account-email" id="user-email-display">user@gmail.com</span>
+            </div>
+            <a id="btn-signout" class="btn-signout" role="button">Sign Out</a>
         </div>
-        <ol>
-            <li>Click <strong>"Get Free API Key"</strong> above to open Google AI Studio.</li>
-            <li>Sign in with your Google account & click <strong>"Create API key"</strong>.</li>
-            <li>Copy your key, paste it into the box below, and click <strong>"Save Key"</strong>.</li>
-        </ol>
-        <div style="margin-top: 6px; font-size: 10px; color: #4cd964;">✓ 100% Free • No credit card required</div>
+
+        <!-- Target Dialect Dropdown -->
+        <div class="field-group">
+            <div class="field-header">
+                <span>Target Dialect</span>
+                <span class="field-sublabel">Script: Latin / Romanized</span>
+            </div>
+            <div class="select-wrapper">
+                <select id="target-language-select" class="custom-select">
+                    <option value="hindi" selected>Hindi (Hinglish)</option>
+                    <option value="tamil">Tamil (Tanglish)</option>
+                    <option value="telugu">Telugu (English letters)</option>
+                    <option value="malayalam">Malayalam (Manglish)</option>
+                    <option value="kannada">Kannada (English letters)</option>
+                    <option value="bengali">Bengali (English letters)</option>
+                    <option value="punjabi">Punjabi (English letters)</option>
+                    <option value="marathi">Marathi (English letters)</option>
+                    <option value="gujarati">Gujarati (English letters)</option>
+                    <option value="odia">Odia (English letters)</option>
+                    <option value="english">Casual Internet English</option>
+                </select>
+                <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Pro Active Card (Visible only when user is Pro) -->
+        <div class="pro-card" id="pro-active-card">
+            <div class="pro-card-header">
+                <div class="pro-tier-pill">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span id="pro-badge-title">Vibe Pro Active</span>
+                </div>
+                <span class="pro-status-badge">Unlimited</span>
+            </div>
+            <p class="pro-desc" id="pro-account-info">Unlimited translations • Priority inference</p>
+        </div>
+
+        <!-- Quota Meter (Visible only for Free Tier) -->
+        <div class="quota-card" id="quota-card">
+            <div class="quota-header">
+                <span>Daily Free Quota</span>
+                <span id="quota-badge" class="quota-badge">5 Free / Day</span>
+            </div>
+            <div class="progress-track">
+                <div id="quota-progress" class="progress-fill"></div>
+            </div>
+            <div class="quota-footer">
+                <span id="quota-used-text">0 / 5 used today</span>
+                <span>Resets at midnight</span>
+            </div>
+        </div>
+
+        <!-- Upgrade Card (Visible only for Free Tier) -->
+        <div class="upgrade-card" id="upgrade-card">
+            <div class="upgrade-top">
+                <div class="upgrade-title">
+                    <span>Unlock Full Access</span>
+                    <span class="pro-pill">PRO</span>
+                </div>
+                <div class="upgrade-price">₹199 / mo</div>
+            </div>
+            
+            <ul class="features-list">
+                <li>
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <span>Unlimited translations (no daily limit)</span>
+                </li>
+                <li>
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <span>Sub-2s priority AI generation</span>
+                </li>
+                <li>
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <span>Authentic emotion & cultural cadence</span>
+                </li>
+            </ul>
+
+            <button id="upgrade-btn" class="btn-upgrade" type="button">
+                <span>Upgrade to Pro</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <!-- API Key Input -->
-    <div class="section-label">
-        <span>Gemini API Key</span>
-        <span style="font-size: 10px; color: #868e96;">Paste here</span>
-    </div>
-    <div class="input-group">
-        <input type="password" id="api-key-input" placeholder="Paste your AI Studio key here" autocomplete="off">
-    </div>
+    <!-- Status Toast Notification (Hidden by default, used for transient alerts) -->
+    <div id="status-msg" class="status-msg"></div>
 
-    <div class="btn-row">
-        <button id="save-btn" class="btn-primary">Save Key</button>
-        <button id="reset-btn" class="btn-secondary">Reset to Default</button>
-    </div>
+    <!-- Footer -->
+    <footer class="app-footer">
+        <span>Vibe Engine v1.2</span>
+        <a href="https://kasyhq.com" target="_blank" rel="noopener noreferrer">kasyhq.com</a>
+    </footer>
 
-    <div id="status-msg" class="status-msg status-info">Ready • 10 trials available per day.</div>
-
-    <div class="footer">
-        Gemini 3.5 Flash Lite • Natural Slang & Emotion
-    </div>
-
+    <script src="config.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>
