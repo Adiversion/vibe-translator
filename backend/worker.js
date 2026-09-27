@@ -166,7 +166,20 @@ export default {
         if (url.pathname === '/translate' && request.method === 'POST') {
             try {
                 const body = await request.json();
-                const { text, targetLanguage, targetDesc: clientTargetDesc, licenseKey, userEmail, forceModel, noCache, subreddit, parentContext } = body;
+                const { 
+                    text, 
+                    targetLanguage, 
+                    targetDesc: clientTargetDesc, 
+                    systemInstruction: clientSystemInstruction,
+                    temperature: clientTemp,
+                    maxOutputTokens: clientTokens,
+                    licenseKey, 
+                    userEmail, 
+                    forceModel, 
+                    noCache, 
+                    subreddit, 
+                    parentContext 
+                } = body;
 
                 if (!text || typeof text !== 'string') {
                     return new Response(JSON.stringify({ error: 'Text field is required' }), {
@@ -236,7 +249,8 @@ export default {
                     subreddit || '',
                     parentContext ? parentContext.slice(0, 40) : ''
                 ].join('|');
-                const cacheKey = `${targetLangKey}:${contextFingerprint}:${cleanText.toLowerCase()}`;
+                const promptSignature = clientSystemInstruction ? clientSystemInstruction.length : 'default';
+                const cacheKey = `${targetLangKey}:${promptSignature}:${contextFingerprint}:${cleanText.toLowerCase()}`;
                 const bypassCache = !!forceModel || !!noCache;
                 if (!bypassCache && memoryCacheStore.has(cacheKey)) {
                     const cachedResult = memoryCacheStore.get(cacheKey);
@@ -261,9 +275,19 @@ export default {
 
                 // ── 2. Payload Builder with Thinking Budget = 0 ──
                 function buildPayload(disableThinking = true) {
+                    const activeTemp = (typeof clientTemp === 'number' && !isNaN(clientTemp))
+                        ? Math.min(1.0, Math.max(0.0, clientTemp))
+                        : 0.4;
+                    const activeTokens = (typeof clientTokens === 'number' && !isNaN(clientTokens))
+                        ? Math.min(4096, Math.max(100, clientTokens))
+                        : 1024;
+                    const activeSystemPrompt = (clientSystemInstruction && typeof clientSystemInstruction === 'string' && clientSystemInstruction.trim().length > 0)
+                        ? clientSystemInstruction.trim()
+                        : SYSTEM_PROMPT.trim();
+
                     const genConfig = {
-                        temperature: 0.4,
-                        maxOutputTokens: 1024
+                        temperature: activeTemp,
+                        maxOutputTokens: activeTokens
                     };
                     if (disableThinking) {
                         genConfig.thinkingConfig = {
@@ -272,7 +296,7 @@ export default {
                     }
                     return {
                         system_instruction: {
-                            parts: [{ text: SYSTEM_PROMPT.trim() }]
+                            parts: [{ text: activeSystemPrompt }]
                         },
                         contents: [
                             {
