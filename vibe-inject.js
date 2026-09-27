@@ -540,7 +540,19 @@ if (typeof chrome !== "undefined" && chrome.storage?.sync) {
 }
 
 let scheduledTimer = null;
+const observedShadowRoots = new WeakSet();
+
+function observeCommentShadowRoots() {
+  document.querySelectorAll("shreddit-comment").forEach(el => {
+    if (el.shadowRoot && !observedShadowRoots.has(el.shadowRoot)) {
+      observedShadowRoots.add(el.shadowRoot);
+      new MutationObserver(debouncedProcess).observe(el.shadowRoot, { childList: true, subtree: true });
+    }
+  });
+}
+
 function processAllContainers() {
+  observeCommentShadowRoots();
   document.querySelectorAll("shreddit-post, shreddit-comment").forEach(el => injectActionBarButton(el));
   document.querySelectorAll('faceplate-tracker[source="search"] article, [data-testid="search-post-unit"]').forEach(el => {
     if (!el.hasAttribute("data-vibe-injected")) injectActionBarButton(el, true);

@@ -53,7 +53,16 @@ const SYSTEM_PROMPT = `You are an elite multilingual street-slang, emotion, and 
 8. Cynical Internet Venting vs Polite Storytelling:
    - When the source is an anonymous Reddit rant, exposé, or gossip:
    - Do NOT write like a polite narrator (avoid stilted phrasing like "ek ladki hoti hai", "dhokhe mein fasna", "jawab diya").
-   - Use active, conversational street slang and cynical framing (e.g., "ek ladki hai", "chutiya na bane", "laundon ko message karna", "patta kaat dena", "bakchodi pelna"). Treat the reader like a friend in an informal group chat.`;
+   - Use active, conversational street slang and cynical framing (e.g., "ek ladki hai", "chutiya na bane", "laundon ko message karna", "patta kaat dena", "bakchodi pelna"). Treat the reader like a friend in an informal group chat.
+
+### Calibration Anchors:
+- Road Rage (Manglish -> Hinglish):
+  Source: "Ho thalleoli ayale kanditum speed kurachilla, matte vandi nirthiya kondu mathrama kunna nirthiyathu. Ee thayoli onnum jeevithathil vandi odikan pattatha reethyil aaki vidanam"
+  Target: "Abey saala madarchod, usko dekh ke bhi speed kam nahi kiya! Woh toh doosri gaadi ruk gayi isliye lund ruk paya. Aise bhenchodon ko toh zindagi bhar gaadi chalane layak hi nahi chhodna chahiye."
+
+- Cynical Dating/Reddit Rants (Telugu -> Hinglish):
+  Source: "Oka chinna story type lo chepta.. Oka girl vuntadi.. aameki cafés ki tirigi baaga pics upload cheyali.. eyy coffee teskunna 300-400 minimum vuntadi.. dating bonda sub open chesi.. vallaki msg chesi cafe lo meet avdam ani.. 2-3 hours sollu cheppesi vacheyali.. lekapothe cut cheseyali."
+  Target: "Ek chhoti si story ki tarah batata hoon.. Ek ladki hai.. usko cafés ghoom ke mast photos upload karni hain.. koi bhi coffee le lo, kam se kam 300-400 lagte hi hain.. dating bonda sub khol ke laundon ko message karke bolti hai café mein milo.. 2-3 ghante bakchodi pelo aur nikal lo.. warna wahi pe patta kaat do."`;
 
 const MAX_DAILY_TRIALS = 5;
 const VIP_PREMIUM_EMAILS = ["anadisyagnik@gmail.com"];
@@ -77,7 +86,7 @@ chrome.runtime.onMessageExternal.addListener((e, t, a) => {
     const email = e.email ? String(e.email).trim().toLowerCase() : "";
     if (email && email.includes("@")) {
       const isVip = VIP_PREMIUM_EMAILS.includes(email);
-      return chrome.storage.sync.set({ userEmail: email, isPremium: !!isVip }, () => {
+      chrome.storage.sync.set({ userEmail: email, isPremium: !!isVip }, () => {
         if (isVip) {
           a({ status: "ok", email, isPro: true });
         } else {
@@ -94,7 +103,8 @@ chrome.runtime.onMessageExternal.addListener((e, t, a) => {
               a({ status: "ok", email, isPro: false });
             });
         }
-      }), true;
+      });
+      return true;
     }
   }
   return true;
@@ -105,7 +115,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
     const email = e.email ? String(e.email).trim().toLowerCase() : "";
     if (email && email.includes("@")) {
       const isVip = VIP_PREMIUM_EMAILS.includes(email);
-      return chrome.storage.sync.set({ userEmail: email, isPremium: !!isVip }, () => {
+      chrome.storage.sync.set({ userEmail: email, isPremium: !!isVip }, () => {
         if (isVip) {
           a({ status: "ok", email, isPro: true, founder: true });
         } else {
@@ -122,9 +132,11 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
               a({ status: "ok", email, isPro: false });
             });
         }
-      }), true;
+      });
+      return true;
     }
-    return a({ status: "error", message: "Invalid email" }), true;
+    a({ status: "error", message: "Invalid email" });
+    return true;
   }
 
   if ("fetch_gemini" === e.action) {
@@ -147,7 +159,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
         let count = (usage.usageDate === today && usage.usageCount) || 0;
 
         if (!isPro && count >= MAX_DAILY_TRIALS) {
-          return void a({
+          return a({
             error: "Daily limit reached (5/5 free used today). Upgrade to Pro for unlimited translations!",
             translated: null,
             limitReached: true,
@@ -162,7 +174,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
         const backendUrl = "undefined" != typeof CONFIG_BACKEND_URL && CONFIG_BACKEND_URL ? CONFIG_BACKEND_URL.trim() : DEFAULT_BACKEND_URL;
 
         if (backendUrl) {
-          return void (async () => {
+          (async () => {
             try {
               const res = await fetch(`${backendUrl.replace(/\/+$/, "")}/translate`, {
                 method: "POST",
@@ -180,7 +192,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
               const data = await res.json();
               if (!res.ok || data.error) {
                 if (data.limitReached) {
-                  return void a({
+                  return a({
                     error: data.error,
                     translated: null,
                     limitReached: true,
@@ -204,11 +216,12 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
               a({ error: `Backend proxy error: ${err.message}`, translated: null });
             }
           })();
+          return;
         }
 
         const apiKey = "undefined" != typeof CONFIG_API_KEY && CONFIG_API_KEY ? CONFIG_API_KEY : "";
         if (!apiKey) {
-          return void a({
+          return a({
             error: "Service is temporarily unconfigured. Please configure CONFIG_BACKEND_URL or CONFIG_API_KEY in config.js.",
             translated: null
           });
@@ -227,7 +240,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
             }
           ],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.4,
             maxOutputTokens: 1024,
             thinkingConfig: { thinkingBudget: 0 }
           },
@@ -262,7 +275,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
                   count += 1;
                   chrome.storage.local.set({ usageDate: today, usageCount: count });
                 }
-                return void a({ translated: outputText, error: null, usedToday: count, maxTrials: MAX_DAILY_TRIALS, isPro });
+                return a({ translated: outputText, error: null, usedToday: count, maxTrials: MAX_DAILY_TRIALS, isPro });
               }
               lastError = "No candidate text returned";
             } catch (err) {

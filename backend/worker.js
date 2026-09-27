@@ -105,7 +105,11 @@ Match that EXACT emotional register in the target language — not a generic tra
 
 - Social / Dating Venting (Tanglish -> Hinglish):
   In: "Aprom solran at one point he was talking to 35-40 women A DAY. Is anyone that unemployed? Avan okay he is tall... irrundhalum ippadiya."
-  Out: "Upar se bolta hai ek point pe toh woh ek din mein 35-40 ladkiyon se baat kar raha tha. Itna vella koi kaise ho sakta hai? Chalo theek hai lamba hai... par fir bhi aisi harkatein?"`;
+  Out: "Upar se bolta hai ek point pe toh woh ek din mein 35-40 ladkiyon se baat kar raha tha. Itna vella koi kaise ho sakta hai? Chalo theek hai lamba hai... par fir bhi aisi harkatein?"
+
+- Cynical Dating/Reddit Rants (Telugu -> Hinglish):
+  In: "Oka chinna story type lo chepta.. Oka girl vuntadi.. aameki cafés ki tirigi baaga pics upload cheyali.. eyy coffee teskunna 300-400 minimum vuntadi.. dating bonda sub open chesi.. vallaki msg chesi cafe lo meet avdam ani.. 2-3 hours sollu cheppesi vacheyali.. lekapothe cut cheseyali."
+  Out: "Ek chhoti si story ki tarah batata hoon.. Ek ladki hai.. usko cafés ghoom ke mast photos upload karni hain.. koi bhi coffee le lo, kam se kam 300-400 lagte hi hain.. dating bonda sub khol ke laundon ko message karke bolti hai café mein milo.. 2-3 ghante bakchodi pelo aur nikal lo.. warna wahi pe patta kaat do."`;
 
 
 const MAX_FREE_DAILY = 5;
@@ -258,8 +262,8 @@ export default {
                 // ── 2. Payload Builder with Thinking Budget = 0 ──
                 function buildPayload(disableThinking = true) {
                     const genConfig = {
-                        temperature: 0.7,
-                        maxOutputTokens: 800
+                        temperature: 0.4,
+                        maxOutputTokens: 1024
                     };
                     if (disableThinking) {
                         genConfig.thinkingConfig = {
