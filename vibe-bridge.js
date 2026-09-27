@@ -179,6 +179,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
               const res = await fetch(`${backendUrl.replace(/\/+$/, "")}/translate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                signal: AbortSignal.timeout(20000),
                 body: JSON.stringify({
                   text: e.text,
                   targetLanguage: langKey,

@@ -450,6 +450,20 @@ function injectActionBarButton(container, isFlat = false) {
     const subredditMatch = window.location.pathname.match(/\/r\/([^\/]+)/i);
     const subreddit = subredditMatch ? subredditMatch[1] : "";
 
+    let hasResponded = false;
+    const safetyTimer = setTimeout(() => {
+      if (!hasResponded) {
+        hasResponded = true;
+        if (titleNode) titleNode.classList.remove("vibe-text-processing");
+        if (bodyNode) bodyNode.classList.remove("vibe-text-processing");
+        btn.style.pointerEvents = "auto";
+        btn.classList.remove("vibe-processing");
+        if (label) label.innerText = "Retry";
+        btn.style.color = "#d93a00";
+        console.warn("[Vibe Translator]: Request timed out after 25s, reset UI.");
+      }
+    }, 25000);
+
     chrome.runtime.sendMessage(
       {
         action: "fetch_gemini",
@@ -459,6 +473,10 @@ function injectActionBarButton(container, isFlat = false) {
         parentContext: parentContext
       },
       res => {
+        if (hasResponded) return;
+        hasResponded = true;
+        clearTimeout(safetyTimer);
+
         if (titleNode) titleNode.classList.remove("vibe-text-processing");
         if (bodyNode) bodyNode.classList.remove("vibe-text-processing");
         btn.style.pointerEvents = "auto";
