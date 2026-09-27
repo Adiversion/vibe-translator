@@ -1,6 +1,6 @@
 {
   "name": "vibe-translator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Vibe Translator Chrome Extension for Reddit",
   "private": true,
   "scripts": {

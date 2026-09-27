@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Vibe Translator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Translates Reddit posts & comments into authentic Indian regional dialects (Hindi, Tamil, Telugu & more) in casual English letters.",
   "permissions": ["storage", "tabs"],
   "content_security_policy": {

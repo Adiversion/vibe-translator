@@ -1,4 +1,4 @@
-# Chrome Web Store Submission & Reviewer Kit — Vibe Translator v1.1.0
+# Chrome Web Store Submission & Reviewer Kit — Vibe Translator v1.2.0
 
 ## 1. Short Description (max 132 chars)
 ```text
