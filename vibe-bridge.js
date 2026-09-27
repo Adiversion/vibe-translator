@@ -117,7 +117,7 @@ chrome.runtime.onMessage.addListener((e, t, a) => {
       const isVip = VIP_PREMIUM_EMAILS.includes(email);
       chrome.storage.sync.set({ userEmail: email, isPremium: !!isVip }, () => {
         if (isVip) {
-          a({ status: "ok", email, isPro: true, founder: true });
+          a({ status: "ok", email, isPro: true });
         } else {
           fetch(`https://kasyhq.com/api/subscription?email=${encodeURIComponent(email)}&product=VIBE`)
             .then(res => res.json())

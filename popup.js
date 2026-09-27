@@ -108,13 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (proActiveCard) proActiveCard.style.display = 'block';
 
                 if (proBadgeTitle) {
-                    proBadgeTitle.innerText = isOwner ? 'Founder Pro' : 'Vibe Pro Active';
+                    proBadgeTitle.innerText = 'Vibe Pro Active';
                 }
 
                 if (proAccountInfo) {
-                    proAccountInfo.innerText = isOwner 
-                        ? 'Founder Lifetime Access • Unlimited priority translations'
-                        : 'Pro Membership Active • Unlimited priority translations';
+                    proAccountInfo.innerText = 'Active Subscription • Unlimited priority translations';
                 }
             } else {
                 // FREE TIER: Show quota meter and upgrade CTA
@@ -303,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isOwner) {
             chrome.storage.sync.remove('userLoggedOut', () => {
                 chrome.storage.sync.set({ userEmail: cleanEmail, isPremium: true, userName: displayName }, () => {
-                    showStatus(`Welcome, Founder (${cleanEmail})! Unlimited Pro Active.`, 'success');
+                    showStatus(`Welcome, ${displayName || cleanEmail}! Pro Subscription Active.`, 'success');
                     refreshUI();
                 });
             });
