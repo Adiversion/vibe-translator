@@ -349,27 +349,14 @@ export default {
                             'x-goog-api-key': masterApiKey
                         };
 
-                        // Try with zero thinking budget first
+                        // Primary request: clean payload without rejected thinkingBudget=0
                         let geminiResp = await fetch(apiUrl, {
                             method: 'POST',
                             headers: headers,
-                            body: JSON.stringify(buildPayload(true))
+                            body: JSON.stringify(buildPayload(false))
                         });
 
                         let data = await geminiResp.json();
-
-                        // Graceful retry without thinkingConfig if this model variant rejects thinking budget
-                        if (!geminiResp.ok && data.error && (
-                            data.error.message?.includes('thinking') || 
-                            data.error.status === 'INVALID_ARGUMENT'
-                        )) {
-                            geminiResp = await fetch(apiUrl, {
-                                method: 'POST',
-                                headers: headers,
-                                body: JSON.stringify(buildPayload(false))
-                            });
-                            data = await geminiResp.json();
-                        }
 
                         const modelDuration = Date.now() - modelStart;
                         if (geminiResp.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {

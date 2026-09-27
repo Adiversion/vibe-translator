@@ -1,65 +1,99 @@
-# Chrome Web Store Submission Metadata
+# Chrome Web Store Submission & Reviewer Kit — Vibe Translator v1.1.0
 
-## Short Description (max 132 chars)
+## 1. Short Description (max 132 chars)
 ```text
-Translates Reddit posts into regional Indian slang using English letters. Powered by Google Gemini AI.
+Translates Reddit posts & comments into authentic Indian regional dialects (Hindi, Tamil, Telugu & more) in casual English letters.
 ```
-*(102 / 132 characters)*
+*(131 / 132 characters — WCAG AA & CWS length validated)*
 
 ---
 
-## Detailed Store Description
+## 2. Detailed Store Listing Description
 ```text
-Translates Reddit posts into authentic regional Indian slang.
-All translations use English letters for easy reading.
-No textbook formal Hindi. No robotic phrasing.
+Translates Reddit posts and comments into authentic, casual Indian regional vernacular — written entirely in English/Latin letters (Hinglish, Tanglish, Telugu, Manglish, etc.).
 
-Supported Languages:
+No robotic, textbook translations. No formal literary phrases. Vibe Translator captures the actual tone, emotion, humor, and internet culture of social media conversations.
+
+Supported Regional Vernaculars:
 • Hindi (Hinglish)
 • Tamil (Tanglish)
-• Telugu (Tenglish)
+• Telugu (Casual Latin script)
 • Malayalam (Manglish)
-• Kannada (Kanglish)
-• Bengali, Punjabi, Marathi, Gujarati, and Odia
-• Conversational Indian English
+• Kannada (Casual Latin script)
+• Bengali (Casual Latin script)
+• Punjabi (Casual Latin script)
+• Marathi (Casual Latin script)
+• Gujarati (Casual Latin script)
+• Odia (Casual Latin script)
+• Casual Internet English (Indian Reddit/Twitter style)
 
 Features:
-• One-click translate button right on Reddit posts and comments.
-• Preserves humor, context, slang, and emojis.
-• Switch back to original text anytime with one click.
-• 10 free translations every day with automatic midnight reset.
-• Connect your free Google AI Studio API key for unlimited translations.
-• 100% private. Your key stays in your local browser storage.
-• No tracking. No telemetry. No middleman servers.
+• One-Click Translation: Adds a seamless "Translate Vibe" button directly beneath Reddit posts and comments.
+• Script Purity: 100% Romanized/Latin alphabet output so you can read spontaneously without deciphering native alphabets.
+• Tone & Emotional Fidelity: Preserves sarcasm, excitement, venting, memes, and cultural slang faithfully.
+• Toggle Anytime: Switch between original text and translated text with a single click.
+• 5 Free Daily Translations: Free daily trial quota resets automatically every midnight.
+• Pro Subscription Available: Upgrade anytime for unlimited, high-priority translations.
+• Privacy-First Architecture: Zero browsing history tracking. Zero advertising trackers. Minimal permissions.
 
-How to Use:
-1. Open the extension popup and pick your language.
-2. Open any Reddit thread.
-3. Click "Vibe Translate" to read in your regional slang.
+How It Works:
+1. Install Vibe Translator and open the extension popup.
+2. Select your default target dialect (e.g. Hindi, Tamil, Telugu).
+3. Browse Reddit and click "Translate Vibe" on any post or comment to read it in your dialect.
 ```
 
 ---
 
-## Single Purpose Justification (for Reviewer)
+## 3. Single Purpose Statement (for CWS Reviewer)
 ```text
-Translates Reddit posts and comments into regional Indian slang written in English letters.
+Translates Reddit posts and comments into regional Indian slang and vernacular written in Latin (English) characters.
 ```
 
 ---
 
-## Permission Justifications (for Reviewer)
+## 4. Permission Justifications (Copy into CWS Developer Dashboard)
 
 ### `storage`
 ```text
-Saves the user's selected language, API key, and daily translation count locally on their device.
+Used locally to save the user's selected target dialect, daily free translation usage counter, and sign-in status.
 ```
 
-### `*://*.reddit.com/*`
+### `tabs`
 ```text
-Adds the translate button to Reddit posts and displays the translated text in the thread.
+Required strictly to handle the Google Sign-In and subscription activation flow with our authentication portal (kasyhq.com), detecting successful sign-in to sync the user's Pro license into the extension.
 ```
 
-### `https://generativelanguage.googleapis.com/*`
+### Host Permission: `*://*.reddit.com/*`
 ```text
-Sends post text to the official Google Gemini API to generate the translation.
+Required to inject the "Translate Vibe" button into Reddit post and comment action rows and display the translated text inline upon user request.
 ```
+
+### Host Permission: `https://vibe-translator-api.audittool-api.workers.dev/*`
+```text
+Dedicated secure Cloudflare Worker serverless API proxy that protects AI system prompts and securely executes translation requests.
+```
+
+### Host Permission: `https://kasyhq.com/*` & `https://*.kasyhq.com/*`
+```text
+Primary web application and license portal used for user Google Sign-In and Pro subscription tier verification.
+```
+
+### Host Permission: `https://accounts.google.com/*` & `https://www.googleapis.com/*`
+```text
+Used to facilitate the Google OAuth sign-in flow and authenticate user identity for synchronization across devices.
+```
+
+---
+
+## 5. Privacy & User Data Disclosures (August 2026 Developer Program Policies - `Purple Nickel`)
+
+* **Privacy Policy URL:** `https://kasyhq.com/privacy`
+* **Data Collected:** 
+  - *Personal Communications:* Text of the specific Reddit post/comment that the user explicitly clicks to translate (transmitted ephemerally via encrypted HTTPS to generate the translation; never stored permanently).
+  - *User Account Info:* Email address for Google Sign-In authentication and Pro license verification.
+* **Data Not Collected:**
+  - No web browsing history.
+  - No keystrokes or form inputs.
+  - No location or device identifiers.
+  - Zero third-party advertising or affiliate tracking.
+* **Affirmative Pre-Install Disclosure:** Included prominently in the extension description and onboarding modal.
