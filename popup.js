@@ -36,6 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const GOOGLE_OAUTH_CLIENT_ID = '952360719209-f5b4439hpqhiacc2nla3vfa7pcog3pk9.apps.googleusercontent.com';
     const GOOGLE_REDIRECT_URI = 'https://kasyhq.com';
 
+    try {
+        const manifest = (typeof chrome !== 'undefined' && chrome.runtime?.getManifest) ? chrome.runtime.getManifest() : null;
+        if (manifest && manifest.version) {
+            const footerSpan = document.querySelector('.app-footer span');
+            if (footerSpan) footerSpan.innerText = `Vibe Engine v${manifest.version}`;
+        }
+    } catch (_) {}
+
     function getTodayKey() {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -152,6 +160,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize UI
     refreshUI();
 
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area === 'sync') {
+                refreshUI();
+                if (changes.userEmail && changes.userEmail.newValue) {
+                    showStatus(`Welcome, ${changes.userEmail.newValue}!`, 'success', true);
+                    if (googleLoginBtn) googleLoginBtn.disabled = false;
+                }
+            }
+        });
+    }
+
     // ── Native Google OAuth Window ──
     function launchGoogleOAuth() {
         return new Promise((resolve, reject) => {
@@ -258,31 +278,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1-Click "Continue with Google"
     if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', async () => {
+        googleLoginBtn.addEventListener('click', () => {
             showStatus('Connecting with Google…', 'info');
             googleLoginBtn.disabled = true;
             try {
-                const token = await launchGoogleOAuth();
-                if (!token) return;
-
-                showStatus('Retrieving Google profile…', 'info');
-                const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${token}` }
+                chrome.runtime.sendMessage({ action: 'start_google_oauth' }, () => {
+                    if (chrome.runtime?.lastError) {
+                        showStatus('Failed to start Google sign-in.', 'error');
+                        googleLoginBtn.disabled = false;
+                    }
                 });
-
-                if (!userRes.ok) {
-                    throw new Error('Failed to retrieve Google profile');
-                }
-
-                const profile = await userRes.json();
-                const email = (profile.email || '').trim().toLowerCase();
-                if (!email) throw new Error('No email found in Google account');
-
-                await handleGoogleAuthenticatedUser(email, profile.name);
             } catch (err) {
-                console.warn('[Vibe Auth Notice]:', err.message);
-                showStatus(err.message === 'Sign-in window closed' ? 'Sign-in cancelled' : err.message, 'error');
-            } finally {
+                showStatus(err.message, 'error');
                 googleLoginBtn.disabled = false;
             }
         });

@@ -1,0 +1,24 @@
+Yeh translation **context aur vibe ke hisaab se bilkul galat aur out of place hai**.
+
+Vibe translator ne yahan yeh galti kar di ki usne har cheez ko zabardasti "chhapri/tapori rant" mode mein convert karne ki koshish ki, jabki original Marathi post ekdum decent, respectful aur helpful post thi.
+
+Kyun yeh translation fail ho gaya:
+
+* **Unnecessary Gaali-Galoch / Slang:**
+* Original mein likha hai *"काकांना अडचण येत होती"* (Uncle ko dikkat aa rahi thi).
+* Vibe translator ne kar diya: *"Kaka ko Marathi typing mein fat rahi thi..."* aur *"unki lag rahi thi"*. Apne ghar ke elder relative ya uncle ke liye aisi gaali-galoch wali language use karna pure context ka kachra kar deta hai.
+
+
+* **Over-the-Top Forced Street Slang:**
+* Original: *"त्यातून होईल!"* (Usse ho jayega).
+* Translator: *"ho jayega scene set!"* — yeh zabardasti ka tapori dialogue lag raha hai.
+
+
+* **Product Ko Cheap Dikha Diya:**
+* Original mein bola hai *"हे साधन तयार झालं"* (yeh tool/solution ban gaya).
+* Translator ne likha *"yeh jugaad ban gaya"*. Coding karke ek website banana aur problem solve karna 'solution/tool' hota hai, 'jugaad' nahi.
+
+
+
+**Faisla:**
+Agar post Tinder/Hinge ka kalesh ya Reddit ka koi frustrated rant hoti, toh aisi abusive bhasha theek lagti. Par ek professional, polite aur family context wali wholesome post mein aisi language daalna **completely inaccurate** hai. Translator ko tone detect karna aana chahiye, har post ko roadside jhagda nahi banaya ja sakta.

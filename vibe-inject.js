@@ -114,6 +114,9 @@ const VIBE_GLOBAL_CSS = `
         border-radius: 8px !important;
         border: none !important;
         cursor: pointer !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-family: inherit !important;
     }
     .vibe-modal-dismiss-btn {
         background: transparent !important;
@@ -158,9 +161,10 @@ function showUpgradeModal(t) {
   el.addEventListener("click", e => { if (e.target === el) dismiss(); });
 }
 
+let pendingTranslateBtn = null;
+
 function showLoginModal(t) {
   if (document.getElementById("vibe-login-modal-backdrop")) return;
-  const url = t?.loginUrl || "https://kasyhq.com/pricing?product=vibe_translator&auth=google";
   const el = document.createElement("div");
   el.id = "vibe-login-modal-backdrop";
   el.className = "vibe-upgrade-modal-backdrop";
@@ -168,13 +172,31 @@ function showLoginModal(t) {
     <div class="vibe-upgrade-dialog" role="dialog" aria-modal="true">
         <h2 class="vibe-modal-title">Sign in to Vibe Translator</h2>
         <p class="vibe-modal-desc">Sign in with Google to get 5 free daily authentic translations on Reddit.</p>
-        <a href="${url}" target="_blank" rel="noopener noreferrer" class="vibe-modal-upgrade-btn">Continue with Google</a>
+        <button type="button" class="vibe-modal-upgrade-btn" id="vibe-login-google-btn">Continue with Google</button>
         <button type="button" class="vibe-modal-dismiss-btn" id="vibe-login-close-btn">Maybe Later</button>
     </div>`;
   document.body.appendChild(el);
   const dismiss = () => { el.remove(); };
   el.querySelector("#vibe-login-close-btn")?.addEventListener("click", dismiss);
   el.addEventListener("click", e => { if (e.target === el) dismiss(); });
+
+  const googleBtn = el.querySelector("#vibe-login-google-btn");
+  if (googleBtn) {
+    googleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      googleBtn.innerText = "Connecting to Google...";
+      googleBtn.style.opacity = "0.7";
+      googleBtn.style.pointerEvents = "none";
+      chrome.runtime.sendMessage({ action: "start_google_oauth" }, () => {
+        if (chrome.runtime?.lastError) {
+          googleBtn.innerText = "Continue with Google";
+          googleBtn.style.opacity = "1";
+          googleBtn.style.pointerEvents = "auto";
+        }
+      });
+    });
+  }
 }
 
 function ensureGlobalStyles(target = document.head) {
@@ -496,6 +518,7 @@ function injectActionBarButton(container, isFlat = false) {
           applyTranslation(lang);
         } else if (res.needsLogin) {
           if (label) label.innerText = "Sign In";
+          pendingTranslateBtn = btn;
           showLoginModal(res);
         } else if (res.limitReached) {
           if (label) label.innerText = "Limit (5/5)";
@@ -519,7 +542,10 @@ function injectActionBarButton(container, isFlat = false) {
     const label = btn.querySelector(".vibe-btn-text");
     const txt = label ? label.innerText : "";
 
-    if (txt === "Sign In") return showLoginModal();
+    if (txt === "Sign In") {
+      pendingTranslateBtn = btn;
+      return showLoginModal();
+    }
     if (txt.includes("Limit")) return showUpgradeModal({ usedToday: 5, maxTrials: 5 });
     if (txt === "Refresh Page") return window.location.reload();
 
@@ -551,8 +577,26 @@ if (typeof chrome !== "undefined" && chrome.storage?.sync) {
     if (res?.targetLanguage) currentTargetLanguage = res.targetLanguage.toLowerCase();
   });
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "sync" && changes.targetLanguage) {
-      handleLanguageChange(changes.targetLanguage.newValue);
+    if (area === "sync") {
+      if (changes.targetLanguage) {
+        handleLanguageChange(changes.targetLanguage.newValue);
+      }
+      if (changes.userEmail && changes.userEmail.newValue) {
+        const modal = document.getElementById("vibe-login-modal-backdrop");
+        if (modal) modal.remove();
+        document.querySelectorAll(".vibe-translate-action-btn").forEach(b => {
+          const lbl = b.querySelector(".vibe-btn-text");
+          if (lbl && lbl.innerText === "Sign In") {
+            lbl.innerText = "Translate Vibe";
+            b.style.color = "var(--color-neutral-content-strong, #1c1c1c)";
+          }
+        });
+        if (pendingTranslateBtn) {
+          const tBtn = pendingTranslateBtn;
+          pendingTranslateBtn = null;
+          tBtn.click();
+        }
+      }
     }
   });
 }
